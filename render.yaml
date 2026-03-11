@@ -8,6 +8,7 @@ services:
     env: node
     region: oregon  # or: frankfurt, singapore, ohio, etc.
     plan: free  # or: starter, standard, pro
+    rootDir: backend
     buildCommand: npm run render-build
     startCommand: npm run render-start
     healthCheckPath: /
