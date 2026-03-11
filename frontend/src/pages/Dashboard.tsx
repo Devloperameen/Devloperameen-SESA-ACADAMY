@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
+import apiService from '../utils/api';
 import { Link } from 'react-router-dom';
 import {
     AlertCircle,
@@ -133,7 +133,6 @@ const Dashboard: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
     useEffect(() => {
         if (!token) return;
@@ -145,9 +144,7 @@ const Dashboard: React.FC = () => {
                 setLoading(true);
                 setError(null);
 
-                const response = await axios.get<DashboardDataResponse>(`${API_URL}/users/dashboard-data`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                const response = await apiService.users.getDashboardData();
 
                 if (mounted) {
                     setDashboardData(response.data);
@@ -168,7 +165,7 @@ const Dashboard: React.FC = () => {
         return () => {
             mounted = false;
         };
-    }, [API_URL, token]);
+    }, [token]);
 
     const role = user?.role;
     const isStudent = role === UserRole.STUDENT || role === UserRole.PREMIUM_STUDENT;

@@ -35,13 +35,25 @@ app.use(helmet({
 }));
 
 // CORS Configuration
-const allowedOrigin = process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? false : '*');
-if (allowedOrigin) console.log(`[CORS] Allowed origin: ${allowedOrigin}`);
+// CORS Configuration
+const getCORSOrigins = () => {
+    const originStr = process.env.CORS_ORIGIN;
+    if (!originStr) return process.env.NODE_ENV === 'production' ? false : '*';
+    
+    // Split by comma if it's a string of origins
+    if (originStr.includes(',')) {
+        return originStr.split(',').map(o => o.trim());
+    }
+    return originStr;
+};
+
+const allowedOrigin = getCORSOrigins();
+console.log(`[CORS] Allowed origin(s): ${Array.isArray(allowedOrigin) ? allowedOrigin.join(', ') : allowedOrigin}`);
 
 const corsOptions = {
     origin: allowedOrigin,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
     credentials: true,
     optionsSuccessStatus: 200
 };
@@ -69,7 +81,14 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth/', authLimiter);
 
-app.use(express.json({ limit: '10kb' })); // Body parser with size limit
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Simple Request Logger
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
+});
 
 // ── Health Check ──────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

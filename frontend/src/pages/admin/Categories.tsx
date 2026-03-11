@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiService from '../../utils/api';
 import { toast } from 'react-toastify';
 import { Folders, Plus, Trash2, Loader2, BookOpen } from 'lucide-react';
 
@@ -12,7 +12,6 @@ interface Category {
 }
 
 const Categories: React.FC = () => {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
     const [name, setName] = useState('');
@@ -26,7 +25,7 @@ const Categories: React.FC = () => {
 
     const fetchCategories = async () => {
         try {
-            const res = await axios.get(`${API_URL}/categories`);
+            const res = await apiService.categories.getAll();
             setCategories(res.data);
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'Failed to fetch categories');
@@ -40,11 +39,7 @@ const Categories: React.FC = () => {
         if (!name.trim()) return;
         setIsSubmitting(true);
         try {
-            const res = await axios.post(
-                `${API_URL}/categories`,
-                { name, description, icon },
-                { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-            );
+            const res = await apiService.categories.create({ name, description, icon });
             setCategories([...categories, res.data]);
             setName('');
             setDescription('');
@@ -59,9 +54,7 @@ const Categories: React.FC = () => {
     const handleDelete = async (id: string) => {
         if (!window.confirm('Are you sure you want to delete this category?')) return;
         try {
-            await axios.delete(`${API_URL}/categories/${id}`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-            });
+            await apiService.categories.delete(id);
             setCategories(categories.filter(c => c._id !== id));
             toast.success('Category deleted successfully');
         } catch (error: any) {

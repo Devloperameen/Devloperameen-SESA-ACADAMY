@@ -1,10 +1,10 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserRole } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { Mail, Lock, Loader, ArrowRight, User, Eye, EyeOff, Shield, BookOpen } from 'lucide-react';
-import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import apiService from '../../utils/api';
 
 interface LoginProps {
     role?: UserRole;
@@ -124,10 +124,8 @@ const Login: React.FC<LoginProps> = ({ role, title }) => {
         }
 
         try {
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
             if (isRegister) {
-                const response = await axios.post(`${API_URL}/auth/register`, {
+                const response = await apiService.auth.register({
                     name: name.trim(),
                     email: email.trim(),
                     password,
@@ -146,10 +144,7 @@ const Login: React.FC<LoginProps> = ({ role, title }) => {
                 return;
             }
 
-            const response = await axios.post(`${API_URL}/auth/login`, {
-                email: email.trim(),
-                password,
-            });
+            const response = await apiService.auth.login(email.trim(), password);
 
             const returnedRole = response.data?.user?.role as UserRole;
             const isMatch = returnedRole === selectedRole;

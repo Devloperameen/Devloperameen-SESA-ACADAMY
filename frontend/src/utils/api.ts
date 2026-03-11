@@ -1,7 +1,14 @@
 import axios from 'axios';
 
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Ensure the base URL always has the /api prefix for consistency
+const getApiBaseUrl = () => {
+  const url = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  return url.endsWith('/api') ? url : `${url}/api`;
+};
+
+const API_BASE_URL = getApiBaseUrl();
+console.log(`[API] Base URL configured as: ${API_BASE_URL}`);
 
 // Create axios instance with default config
 const api = axios.create({
@@ -71,94 +78,120 @@ export const apiService = {
   // Auth endpoints
   auth: {
     login: (email: string, password: string) => 
-      api.post('/api/auth/login', { email, password }),
+      api.post('/auth/login', { email, password }),
     register: (data: any) => 
-      api.post('/api/auth/register', data),
+      api.post('/auth/register', data),
     logout: () => 
-      api.post('/api/auth/logout'),
+      api.post('/auth/logout'),
   },
 
   // Course endpoints
   courses: {
     getAll: (params?: any) => 
-      api.get('/api/courses', { params }),
+      api.get('/courses', { params }),
     getById: (id: string) => 
-      api.get(`/api/courses/${id}`),
+      api.get(`/courses/${id}`),
     create: (data: any) => 
-      api.post('/api/courses', data),
+      api.post('/courses', data),
     update: (id: string, data: any) => 
-      api.put(`/api/courses/${id}`, data),
+      api.put(`/courses/${id}`, data),
     delete: (id: string) => 
-      api.delete(`/api/courses/${id}`),
+      api.delete(`/courses/${id}`),
     
     // Course management endpoints
     getFreePreview: (courseId: string) =>
-      api.get(`/api/course-management/courses/${courseId}/free-preview`),
+      api.get(`/course-management/courses/${courseId}/free-preview`),
     getLesson: (courseId: string, lessonIndex: number) =>
-      api.get(`/api/course-management/courses/${courseId}/lesson/${lessonIndex}`),
+      api.get(`/course-management/courses/${courseId}/lesson/${lessonIndex}`),
     getFullContent: (courseId: string) =>
-      api.get(`/api/course-management/courses/${courseId}/full-content`),
+      api.get(`/course-management/courses/${courseId}/full-content`),
   },
 
   // Enrollment endpoints
   enrollments: {
     requestAccess: (courseId: string, data: any) =>
-      api.post(`/api/enrollments/request/${courseId}`, data),
+      api.post(`/enrollments/request/${courseId}`, data),
     getMyEnrollments: () =>
-      api.get('/api/courses/my/enrolled'),
+      api.get('/courses/my/enrolled'),
   },
 
   // Teacher endpoints
   teacher: {
     getPendingCourses: () =>
-      api.get('/api/course-management/teacher/courses/my-pending'),
+      api.get('/course-management/teacher/courses/my-pending'),
     getPublishedCourses: () =>
-      api.get('/api/course-management/teacher/courses/my-published'),
+      api.get('/course-management/teacher/courses/my-published'),
     getStats: () =>
-      api.get('/api/course-management/teacher/courses/my-stats'),
+      api.get('/course-management/teacher/courses/my-stats'),
   },
 
   // Admin endpoints
   admin: {
     // Course review
     getPendingReviewCourses: () =>
-      api.get('/api/course-management/admin/courses/pending-review'),
+      api.get('/course-management/admin/courses/pending-review'),
     previewCourse: (courseId: string) =>
-      api.get(`/api/course-management/admin/courses/${courseId}/preview`),
+      api.get(`/course-management/admin/courses/${courseId}/preview`),
     reviewCourse: (courseId: string, decision: 'accept' | 'reject', adminComment?: string) =>
-      api.put(`/api/course-management/admin/courses/${courseId}/review`, { decision, adminComment }),
+      api.put(`/course-management/admin/courses/${courseId}/review`, { decision, adminComment }),
     
     // Enrollment verification
     getEnrollmentsForVerification: () =>
-      api.get('/api/course-management/admin/enrollments/verification'),
+      api.get('/course-management/admin/enrollments/verification'),
     verifyEnrollment: (enrollmentId: string, adminComment?: string) =>
-      api.put(`/api/course-management/admin/enrollments/${enrollmentId}/verify`, { adminComment }),
+      api.put(`/course-management/admin/enrollments/${enrollmentId}/verify`, { adminComment }),
     
     // Course management
     toggleCourseLock: (courseId: string, locked: boolean) =>
-      api.patch(`/api/course-management/courses/${courseId}/toggle-lock`, { locked }),
+      api.patch(`/course-management/courses/${courseId}/toggle-lock`, { locked }),
     toggleCourseVisibility: (courseId: string, visible: boolean) =>
-      api.patch(`/api/course-management/courses/${courseId}/toggle-visibility`, { visible }),
+      api.patch(`/course-management/courses/${courseId}/toggle-visibility`, { visible }),
+  },
+
+  // Announcement endpoints
+  announcements: {
+    getAll: () => 
+      api.get('/announcements'),
+    create: (data: any) => 
+      api.post('/announcements', data),
+    toggle: (id: string, isActive: boolean) =>
+      api.put(`/announcements/${id}/toggle`, { isActive }),
   },
 
   // User endpoints
   users: {
     getProfile: () =>
-      api.get('/api/users/profile'),
+      api.get('/users/profile'),
     updateProfile: (data: any) =>
-      api.put('/api/users/profile', data),
+      api.put('/users/profile', data),
+    getDashboardData: () =>
+      api.get('/users/dashboard-data'),
+  },
+
+  // Category endpoints
+  categories: {
+    getAll: () =>
+      api.get('/categories'),
+    getById: (id: string) =>
+      api.get(`/categories/${id}`),
+    create: (data: any) =>
+      api.post('/categories', data),
+    update: (id: string, data: any) =>
+      api.put(`/categories/${id}`, data),
+    delete: (id: string) =>
+      api.delete(`/categories/${id}`),
   },
 
   // Payment endpoints
   payments: {
     create: (data: any) =>
-      api.post('/api/payments', data),
+      api.post('/payments', data),
     getHistory: () =>
-      api.get('/api/payments/history'),
+      api.get('/payments/history'),
   },
 
   // Utility function to check API health
-  healthCheck: () => api.get('/'),
+  healthCheck: () => api.get('/health'),
 };
 
 export default apiService;

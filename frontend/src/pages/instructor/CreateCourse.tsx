@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { showError, showLoading, updateToast } from '../../utils/toast';
-import axios from 'axios';
+import apiService from '../../utils/api';
 import { ArrowLeft, Youtube, BookOpen, Tag, Clock, BarChart3 } from 'lucide-react';
 
 interface Category {
@@ -14,7 +14,7 @@ interface Category {
 
 const CreateCourse: React.FC = () => {
     const navigate = useNavigate();
-    const { token } = useAuth();
+    const { } = useAuth();
     const [loading, setLoading] = useState(false);
     const [categories, setCategories] = useState<Category[]>([]);
     const [formData, setFormData] = useState({
@@ -29,7 +29,6 @@ const CreateCourse: React.FC = () => {
         lessons: [{ title: '', videoUrl: '', order: 1 }]
     });
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
     useEffect(() => {
         fetchCategories();
@@ -37,7 +36,7 @@ const CreateCourse: React.FC = () => {
 
     const fetchCategories = async () => {
         try {
-            const res = await axios.get(`${API_URL}/categories`);
+            const res = await apiService.categories.getAll();
             setCategories(res.data);
         } catch (err) {
             console.error('Error fetching categories:', err);
@@ -85,16 +84,10 @@ const CreateCourse: React.FC = () => {
         try {
             const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(Boolean);
             
-            await axios.post(
-                `${API_URL}/courses`,
-                {
-                    ...formData,
-                    tags: tagsArray
-                },
-                {
-                    headers: { Authorization: `Bearer ${token}` }
-                }
-            );
+            await apiService.courses.create({
+                ...formData,
+                tags: tagsArray
+            });
 
             updateToast(toastId, 'success', 'Course created successfully!');
             setTimeout(() => navigate('/dashboard'), 1500);

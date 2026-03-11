@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import axios from 'axios';
+import apiService from '../utils/api';
 import { motion } from 'framer-motion';
 import { Megaphone } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -17,7 +17,6 @@ const AnnouncementBanner: React.FC = () => {
     const { token, isAuthenticated } = useAuth();
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
     useEffect(() => {
         if (!token || !isAuthenticated) {
@@ -29,9 +28,7 @@ const AnnouncementBanner: React.FC = () => {
 
         const fetchAnnouncements = async (): Promise<void> => {
             try {
-                const response = await axios.get<Announcement[]>(`${API_URL}/announcements`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                const response = await apiService.announcements.getAll();
 
                 if (isMounted) {
                     setAnnouncements(Array.isArray(response.data) ? response.data : []);
@@ -51,7 +48,7 @@ const AnnouncementBanner: React.FC = () => {
             isMounted = false;
             window.clearInterval(interval);
         };
-    }, [API_URL, token, isAuthenticated]);
+    }, [token, isAuthenticated]);
 
     const marqueeText = useMemo(() => {
         if (announcements.length === 0) return '';
