@@ -1,5 +1,6 @@
 import express from 'express';
-import type { Response, Request, NextFunction } from 'express';
+import type { Request, NextFunction } from 'express';
+import type { Response } from 'express';
 import mongoose from 'mongoose';
 import { body, validationResult } from 'express-validator';
 import Course, { type ICourse } from '../models/Course.js';
@@ -127,7 +128,7 @@ const requestEnrollment = async (req: AuthRequest, res: Response) => {
 };
 
 // @route   POST api/courses
-// @desc    Create Course (Instructor/Admin only)
+// @desc    Create Course (Instructor/Admin only) - Auto goes to Admin Review Mode
 // @access  Private
 router.post(
     '/',
@@ -179,6 +180,11 @@ router.post(
                 ? lessons.filter((lesson: any) => typeof lesson === 'object' && lesson !== null && lesson.title && lesson.videoUrl)
                 : [];
 
+            // Auto-set status to "Pending Approval" for teacher-created courses
+            const isTeacher = req.user!.role === UserRole.INSTRUCTOR || req.user!.role === UserRole.ASSISTANT_INSTRUCTOR;
+            const initialStatus = isTeacher ? 'pending' : 'approved';
+            const isPublished = !isTeacher; // Only auto-publish if created by admin
+
             const course = new Course({
                 title,
                 description,
@@ -198,13 +204,21 @@ router.post(
                 pendingApprovals: [],
                 comments: [],
                 reviews: [],
+                status: initialStatus,
+                isPublished,
+                isHidden: isTeacher, // Hide from students while pending
             });
 
             await course.save();
             await course.populate('instructor', 'name');
             await course.populate('category', 'name icon');
 
-            res.status(201).json(course);
+            res.status(201).json({
+                ...course.toObject(),
+                message: isTeacher 
+                    ? 'Course created successfully and submitted for admin review' 
+                    : 'Course created and published successfully'
+            });
         } catch (err) {
             console.error(err);
             res.status(500).json({ message: 'Server error' });
@@ -779,15 +793,12 @@ router.put(
     }
 );
 
-// @route   PATCH api/courses/:id/status
-// @desc    Update course status (approve/reject)
-// @access  Private (Admin only)
 router.patch(
     '/:id/status',
     authenticate,
     checkRole([UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MODERATOR]),
     [
-        body('status', 'Status must be approved or rejected').isIn(['approved', 'rejected']),
+        body('status', 'Invalid status').isIn(['approved', 'rejected', 'locked', 'hidden', 'pending']),
         body('adminComment').optional().isString()
     ],
     validate,
@@ -796,13 +807,25 @@ router.patch(
             const course = await Course.findById(req.params.id);
             if (!course) return res.status(404).json({ message: 'Course not found' });
 
-            course.status = req.body.status;
-            if (req.body.adminComment) {
-                course.adminComment = req.body.adminComment;
-            }
-            await course.save();
+            const { status, adminComment } = req.body;
+            course.status = status;
+            if (adminComment) course.adminComment = adminComment;
 
-            res.json({ message: `Course ${req.body.status} successfully`, course });
+            if (status === 'approved') {
+                course.isPublished = true;
+                course.isHidden = false;
+                course.lockedAt = undefined;
+            } else if (status === 'rejected') {
+                course.isPublished = false;
+            } else if (status === 'locked') {
+                course.lockedAt = new Date();
+            } else if (status === 'hidden') {
+                course.isPublished = false;
+                course.isHidden = true;
+            }
+
+            await course.save();
+            res.json({ message: `Course ${status} successfully`, course });
         } catch (err) {
             console.error(err);
             res.status(500).json({ message: 'Server error' });

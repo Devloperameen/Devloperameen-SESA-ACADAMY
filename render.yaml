@@ -1,0 +1,71 @@
+# Render Configuration for SESA Backend API
+# Documentation: https://render.com/docs/yaml-spec
+
+services:
+  # Backend API Service
+  - type: web
+    name: sesa-backend
+    env: node
+    region: oregon  # or: frankfurt, singapore, ohio, etc.
+    plan: free  # or: starter, standard, pro
+    buildCommand: npm run render-build
+    startCommand: npm run render-start
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        sync: false  # Set this in Render dashboard after getting frontend URL
+      - key: SOCKET_CORS_ORIGIN
+        sync: false  # Set this in Render dashboard after getting frontend URL
+      - key: MONGO_URI
+        sync: false  # Set your MongoDB Atlas URI in Render dashboard
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 1000
+      - key: APP_NAME
+        value: SESA Educational Platform
+      - key: APP_VERSION
+        value: 1.0.0
+
+    # Scaling
+    numInstances: 1
+    # disk:
+    #   name: data
+    #   mountPath: /data
+    #   sizeGB: 1
+
+    # Advanced
+    # domains:
+    #   - api.yourdomain.com
+    # headers:
+    #   - name: X-Frame-Options
+    #     value: DENY
+    #   - name: X-Content-Type-Options
+    #     value: nosniff
+    #   - name: Referrer-Policy
+    #     value: strict-origin-when-cross-origin
+
+# Optional: Database service (if not using MongoDB Atlas)
+# databases:
+#   - name: sesa-mongodb
+#     databaseName: sesa
+#     plan: free
+#     ipAllowList:
+#       - source: 0.0.0.0/0
+#         description: everywhere
+
+# Optional: Cron jobs
+# jobs:
+#   - type: cron
+#     name: cleanup-sessions
+#     schedule: "0 2 * * *"  # Daily at 2 AM
+#     env: node
+#     buildCommand: npm install
+#     startCommand: node scripts/cleanup-sessions.js

@@ -25,8 +25,10 @@ import Students from "./pages/instructor/Students";
 import Analytics from "./pages/instructor/Analytics";
 import ManageUsers from "./pages/admin/ManageUsers";
 import Approvals from "./pages/admin/Approvals";
+import AdminCourses from "./pages/admin/AdminCourses";
 import Categories from "./pages/admin/Categories";
 import Settings from "./pages/admin/Settings";
+import MyCourses from "./pages/instructor/MyCourses";
 import { UserRole } from "./types";
 import "./index.css";
 
@@ -124,6 +126,14 @@ const AppRoutes: React.FC = () => {
                             </ProtectedRoute>
                         }
                     />
+                     <Route
+                        path="/instructor/my-courses"
+                        element={
+                            <ProtectedRoute allowedRoles={[UserRole.INSTRUCTOR, UserRole.ADMIN]} wrapLayout>
+                                <MyCourses />
+                            </ProtectedRoute>
+                        }
+                    />
 
                     {/* Admin Routes */}
                     <Route
@@ -147,6 +157,14 @@ const AppRoutes: React.FC = () => {
                         element={
                             <ProtectedRoute allowedRoles={[UserRole.ADMIN]} wrapLayout>
                                 <Categories />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/admin/courses"
+                        element={
+                            <ProtectedRoute allowedRoles={[UserRole.ADMIN]} wrapLayout>
+                                <AdminCourses />
                             </ProtectedRoute>
                         }
                     />

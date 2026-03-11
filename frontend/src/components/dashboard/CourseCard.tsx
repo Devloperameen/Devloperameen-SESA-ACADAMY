@@ -1,11 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { BookOpen, CheckCircle2, Clock3, PlayCircle, Sparkles, Trophy } from 'lucide-react';
-import clsx, { type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { Activity, BookOpen, CheckCircle2, Clock3, PlayCircle, Sparkles, Trophy, Unlock } from 'lucide-react';
 import { SafeImage } from '../ui/SafeImage';
+import { cn } from '../../utils/cn';
 
-export const cn = (...inputs: ClassValue[]): string => twMerge(clsx(inputs));
 
 export interface StudentCourse {
     id: string;
@@ -21,6 +19,7 @@ export interface StudentCourse {
     tags?: string[];
     isLive?: boolean;
     lastOpenedLabel?: string;
+    enrollmentStatus?: 'approved' | 'pending' | 'rejected' | 'unknown';
 }
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -246,79 +245,123 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, index = 0, onOpe
         return undefined;
     }, [isCompleted, course, onCompleted]);
 
-    const difficultyVariant: BadgeProps['variant'] =
-        course.difficulty === 'Advanced' ? 'warning' : course.difficulty === 'Intermediate' ? 'accent' : 'default';
+
+    const isApproved = course.enrollmentStatus === 'approved';
+    const isPending = course.enrollmentStatus === 'pending';
 
     return (
         <motion.article
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.08, duration: 0.34, ease: 'easeOut' }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: index * 0.08, duration: 0.4, ease: 'easeOut' }}
             className="relative"
         >
-            <Card className="group relative overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/45 hover:shadow-[0_18px_44px_rgba(14,165,233,0.2)]">
+            <Card className={cn(
+                "group relative overflow-hidden p-6 transition-all duration-500",
+                "hover:-translate-y-2 hover:border-blue-400/40 hover:shadow-[0_20px_50px_rgba(30,58,138,0.4)]",
+                isApproved ? "border-emerald-500/20 bg-gradient-to-br from-slate-900/80 to-emerald-900/5" : "bg-slate-900/40"
+            )}>
                 <ConfettiBurst active={showConfetti} />
 
-                <div className="mb-4 flex items-start justify-between gap-4">
-                    <div className="space-y-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-lg font-bold text-slate-100">{course.title}</h3>
-                            {course.isLive && <Badge variant="accent">Live</Badge>}
-                        </div>
-                        <p className="line-clamp-2 text-sm text-slate-300/90">{course.summary}</p>
+                {/* Status Badges Header */}
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex flex-wrap gap-2">
+                        {course.isLive && (
+                            <Badge variant="accent" className="animate-pulse bg-blue-500 text-white border-none px-3">
+                                <span className="mr-1 w-1.5 h-1.5 bg-white rounded-full" /> LIVE
+                            </Badge>
+                        )}
+                        {isApproved ? (
+                            <Badge variant="success" className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+                                <Unlock className="w-3 h-3 mr-1" /> Full Access
+                            </Badge>
+                        ) : isPending ? (
+                            <Badge variant="warning" className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+                                <Clock3 className="w-3 h-3 mr-1" /> Pending
+                            </Badge>
+                        ) : (
+                            <Badge variant="default" className="bg-slate-800/80 text-slate-400">
+                                <Sparkles className="w-3 h-3 mr-1" /> Preview Mode
+                            </Badge>
+                        )}
                     </div>
-
-                    <div className="rounded-xl border border-slate-700 bg-slate-900/80 p-2.5 text-cyan-300">
+                    <div className={cn(
+                        "p-2 rounded-xl transition-colors duration-300",
+                        isCompleted ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-800/80 text-slate-400 group-hover:bg-blue-500/20 group-hover:text-blue-400"
+                    )}>
                         {isCompleted ? <Trophy className="h-5 w-5" /> : <BookOpen className="h-5 w-5" />}
                     </div>
                 </div>
 
-                <div className="mb-4 flex flex-wrap items-center gap-2">
-                    <Badge variant={difficultyVariant}>{course.difficulty}</Badge>
-                    <Badge variant="default">
-                        <Clock3 className="h-3.5 w-3.5" />
-                        {course.durationLabel}
-                    </Badge>
-                    <Badge variant={isCompleted ? 'success' : 'accent'}>
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                        {course.completedLessons}/{course.totalLessons} lessons
-                    </Badge>
+                <div className="mb-4 space-y-2">
+                    <h3 className="text-xl font-black text-white group-hover:text-blue-300 transition-colors leading-tight">
+                        {course.title}
+                    </h3>
+                    <p className="line-clamp-2 text-sm text-slate-400 group-hover:text-slate-300 transition-colors leading-relaxed">
+                        {course.summary}
+                    </p>
                 </div>
 
-                <div className="mb-3 flex items-center justify-between text-xs text-slate-300">
-                    <span>Progress</span>
-                    <span className={cn('font-semibold', isCompleted ? 'text-emerald-300' : 'text-cyan-300')}>
-                        {normalizedProgress}%
-                    </span>
+                <div className="mb-6 flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                        <Activity className="w-3.5 h-3.5" /> {course.difficulty}
+                    </div>
+                    <div className="h-1 w-1 rounded-full bg-slate-700" />
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                        <Clock3 className="w-3.5 h-3.5" /> {course.durationLabel}
+                    </div>
+                    <div className="h-1 w-1 rounded-full bg-slate-700" />
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> {course.completedLessons}/{course.totalLessons}
+                    </div>
                 </div>
 
-                <div className="mb-5 h-2.5 rounded-full bg-slate-800/90">
-                    <motion.div
-                        className={cn(
-                            'h-full rounded-full bg-gradient-to-r from-cyan-400 to-blue-500',
-                            isCompleted &&
-                                'from-emerald-300 via-cyan-300 to-blue-300 shadow-[0_0_22px_rgba(45,212,191,0.95)]'
-                        )}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${normalizedProgress}%` }}
-                        transition={{ duration: 0.7, ease: 'easeInOut' }}
-                    />
-                </div>
-
-                <div className="flex items-center justify-between gap-3">
-                    <div className="flex min-w-0 items-center gap-2 text-xs text-slate-400">
-                        <Sparkles className="h-3.5 w-3.5 flex-shrink-0 text-cyan-300" />
-                        <span className="truncate">{course.lastOpenedLabel ?? `Instructor: ${course.instructor}`}</span>
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs font-black uppercase tracking-widest">
+                            <span className="text-slate-500">Course Progress</span>
+                            <span className={cn(isCompleted ? 'text-emerald-400' : 'text-blue-400')}>
+                                {normalizedProgress}%
+                            </span>
+                        </div>
+                        <div className="relative h-2 rounded-full bg-slate-800/80 overflow-hidden shadow-inner">
+                            <motion.div
+                                className={cn(
+                                    'absolute inset-y-0 left-0 rounded-full bg-gradient-to-r',
+                                    isCompleted 
+                                        ? 'from-emerald-400 to-teal-500 shadow-[0_0_15px_rgba(52,211,153,0.5)]' 
+                                        : 'from-blue-500 to-cyan-400 shadow-[0_0_10px_rgba(59,130,246,0.3)]'
+                                )}
+                                initial={{ width: 0 }}
+                                animate={{ width: `${normalizedProgress}%` }}
+                                transition={{ duration: 1, ease: 'circOut' }}
+                            />
+                        </div>
                     </div>
 
-                    <Button
-                        size="sm"
-                        leftIcon={<PlayCircle className="h-4 w-4" />}
-                        onClick={() => onOpen?.(course)}
-                        className="flex-shrink-0"
-                    >
-                        {isCompleted ? 'Review' : 'Continue'}
-                    </Button>
+                    <div className="pt-2 flex items-center justify-between gap-4">
+                        <div className="flex min-w-0 items-center gap-2.5">
+                            <Avatar name={course.instructor} className="w-8 h-8 ring-2 ring-slate-800" />
+                            <div className="min-w-0">
+                                <p className="text-[10px] font-black uppercase tracking-tighter text-slate-500">Instructor</p>
+                                <p className="truncate text-xs font-bold text-white leading-tight">{course.instructor}</p>
+                            </div>
+                        </div>
+
+                        <Button
+                            size="md"
+                            variant={isApproved ? "primary" : "secondary"}
+                            leftIcon={isApproved ? <PlayCircle className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+                            onClick={() => onOpen?.(course)}
+                            className={cn(
+                                "flex-shrink-0 px-6 rounded-2xl transition-all duration-300",
+                                isApproved ? "shadow-lg shadow-blue-500/20" : "hover:bg-blue-500 hover:text-white"
+                            )}
+                        >
+                            {isCompleted ? 'Review' : isApproved ? 'Continue' : 'Part 1 Free'}
+                        </Button>
+                    </div>
                 </div>
             </Card>
         </motion.article>

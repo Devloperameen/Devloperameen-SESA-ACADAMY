@@ -5,11 +5,14 @@ import { AnimatePresence, motion, type Variants } from 'framer-motion';
 import {
     Activity,
     BookOpen,
+    CheckCircle2,
     Flame,
+    Plus,
     Search,
     Sparkles,
     Trophy,
 } from 'lucide-react';
+import { cn } from '../../utils/cn';
 import {
     Avatar,
     Badge,
@@ -17,7 +20,6 @@ import {
     Card,
     CourseCard,
     CourseCardSkeleton,
-    cn,
     type StudentCourse,
 } from './CourseCard';
 
@@ -126,6 +128,7 @@ const normalizeCourse = (course: ApiCourseResponse, index: number): StudentCours
         difficulty,
         isLive: index === 0,
         lastOpenedLabel: progressPercent >= 100 ? 'Completed this week' : 'Last opened recently',
+        enrollmentStatus: course.enrollmentStatus,
     };
 };
 
@@ -144,6 +147,25 @@ const fetchStudentCourses = async (token?: string): Promise<StudentCourse[]> => 
     }
 
     return response.data.map(normalizeCourse);
+};
+
+const fetchDiscoverCourses = async (token?: string): Promise<StudentCourse[]> => {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const response = await axios.get<ApiCourseResponse[]>(`${API_URL}/courses`);
+    
+    // Filter out courses the student is already enrolled in
+    let enrolledIds: string[] = [];
+    if (token) {
+        const enrolledResponse = await axios.get<ApiCourseResponse[]>(`${API_URL}/courses/my/enrolled`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        enrolledIds = enrolledResponse.data.map(c => c._id);
+    }
+
+    return (response.data ?? [])
+        .filter(c => !enrolledIds.includes(c._id))
+        .slice(0, 4)
+        .map((c, i) => normalizeCourse(c, i));
 };
 
 interface CommandPaletteProps {
@@ -211,7 +233,13 @@ const DashboardLayoutContent: React.FC<DashboardLayoutProps> = ({
         queryFn: () => (fetchCourses ? fetchCourses(token ?? undefined) : fetchStudentCourses(token ?? undefined)),
     });
 
+    const discoverQuery = useQuery({
+        queryKey: ['student-discover-courses', token ?? 'guest'],
+        queryFn: () => fetchDiscoverCourses(token ?? undefined),
+    });
+
     const courses = coursesQuery.data ?? [];
+    const discoverCourses = discoverQuery.data ?? [];
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -250,11 +278,6 @@ const DashboardLayoutContent: React.FC<DashboardLayoutProps> = ({
         [courses]
     );
 
-    const averageProgress = useMemo(() => {
-        if (courses.length === 0) return 0;
-        const total = courses.reduce((sum, course) => sum + course.progressPercent, 0);
-        return Math.round(total / courses.length);
-    }, [courses]);
 
     const handleCourseOpen = (course: StudentCourse): void => {
         setSelectedCourse(course);
@@ -270,86 +293,141 @@ const DashboardLayoutContent: React.FC<DashboardLayoutProps> = ({
                 animate="show"
             >
                 <motion.section className="space-y-6 lg:col-span-8" variants={itemVariants}>
-                    <Card className="p-5 sm:p-6">
-                        <motion.div className="space-y-5" variants={containerVariants} initial="hidden" animate="show">
-                            <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-between gap-3">
+                    <Card className="p-0 overflow-hidden border-none bg-gradient-to-br from-[#1e293b] to-[#0f172a] shadow-2xl relative">
+                        {/* Abstract background element */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -mr-32 -mt-32" />
+                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl -ml-32 -mb-32" />
+                        
+                        <motion.div className="p-6 sm:p-8 space-y-8 relative z-10" variants={containerVariants} initial="hidden" animate="show">
+                            <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-between gap-6">
                                 <div>
-                                    <h1 className="text-2xl font-bold tracking-tight">Welcome back, {safeUser.name}</h1>
-                                    <p className="mt-1 text-sm text-slate-300">
-                                        Build streaks. Finish milestones. Stay in your flow state.
+                                    <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white italic">
+                                        Hello, <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">{safeUser.name.split(' ')[0]}</span>
+                                    </h1>
+                                    <p className="mt-2 text-slate-400 font-medium max-w-md">
+                                        Your learning momentum is high! Ready to tackle today's milestones?
                                     </p>
                                 </div>
-                                <Badge variant="accent" className="px-3 py-1.5 text-xs">
-                                    <Flame className="h-3.5 w-3.5" />
-                                    {safeUser.streakDays} day streak
-                                </Badge>
+                                <div className="flex items-center gap-3">
+                                    <div className="flex flex-col items-end">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Global Rank</p>
+                                        <p className="text-sm font-bold text-white">#42nd Scholar</p>
+                                    </div>
+                                    <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 p-0.5 shadow-lg shadow-cyan-500/20">
+                                        <div className="flex h-full w-full items-center justify-center rounded-[14px] bg-slate-900">
+                                            <Trophy className="h-6 w-6 text-cyan-400" />
+                                        </div>
+                                    </div>
+                                </div>
                             </motion.div>
 
                             <motion.div variants={itemVariants} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                                <Card className="p-4 relative overflow-hidden flex flex-col justify-between">
-                                    <div className="relative z-10 flex items-center justify-between">
-                                        <div>
-                                            <p className="text-xs uppercase tracking-wider text-slate-400">Avg Progress</p>
-                                            <p className="mt-2 text-3xl font-extrabold text-cyan-300 drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]">{averageProgress}%</p>
-                                        </div>
-                                        <div className="relative w-16 h-16 flex items-center justify-center">
-                                            <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                                                <circle cx="18" cy="18" r="16" fill="none" className="stroke-slate-700/50" strokeWidth="3" />
-                                                <motion.circle 
-                                                    cx="18" 
-                                                    cy="18" 
-                                                    r="16" 
-                                                    fill="none" 
-                                                    className="stroke-cyan-400" 
-                                                    strokeWidth="3" 
-                                                    strokeLinecap="round"
-                                                    strokeDasharray="100"
-                                                    initial={{ strokeDashoffset: 100 }}
-                                                    animate={{ strokeDashoffset: 100 - averageProgress }}
-                                                    transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
-                                                />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl pointer-events-none" />
-                                </Card>
-                                <Card className="p-4 relative overflow-hidden flex flex-col justify-between border-emerald-500/20">
+                                {/* XP Stat */}
+                                <div className="group relative rounded-3xl border border-white/5 bg-white/[0.03] p-5 transition-all hover:bg-white/[0.06] overflow-hidden">
                                     <div className="relative z-10">
-                                        <div className="flex justify-between items-start">
-                                            <p className="text-xs uppercase tracking-wider text-slate-400">Completed</p>
-                                            <div className="bg-emerald-500/20 p-1.5 rounded-lg">
-                                                <Trophy className="w-4 h-4 text-emerald-400" />
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="p-2 rounded-xl bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/30">
+                                                <Sparkles className="w-5 h-5" />
+                                            </div>
+                                            <Badge variant="default" className="bg-blue-500/10 text-blue-300 border-none">+12%</Badge>
+                                        </div>
+                                        <p className="text-3xl font-black text-white">{safeUser.totalXp.toLocaleString()}</p>
+                                        <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mt-1">Total Experience</p>
+                                    </div>
+                                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                        <Activity className="w-16 h-16" />
+                                    </div>
+                                </div>
+
+                                {/* Streak Stat */}
+                                <div className="group relative rounded-3xl border border-white/5 bg-white/[0.03] p-5 transition-all hover:bg-white/[0.06] overflow-hidden">
+                                    <div className="relative z-10">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="p-2 rounded-xl bg-orange-500/20 text-orange-400 ring-1 ring-orange-500/30">
+                                                <Flame className="w-5 h-5" />
+                                            </div>
+                                            <div className="flex -space-x-1.5">
+                                                {[1,2,3].map(i => <div key={i} className="w-5 h-5 rounded-full border-2 border-[#1e293b] bg-slate-700" />)}
                                             </div>
                                         </div>
-                                        <p className="mt-2 text-3xl font-extrabold text-emerald-300 drop-shadow-[0_0_8px_rgba(52,211,153,0.4)]">{completionCount}</p>
-                                        <p className="text-xs text-emerald-400/80 mt-1">Courses finished</p>
+                                        <p className="text-3xl font-black text-white">{safeUser.streakDays}</p>
+                                        <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mt-1">Active Streak</p>
                                     </div>
-                                    <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
-                                </Card>
-                                <Card className="p-4 relative overflow-hidden flex flex-col justify-between border-blue-500/20">
+                                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                        <Flame className="w-16 h-16" />
+                                    </div>
+                                </div>
+
+                                {/* Completion Stat */}
+                                <div className="group relative rounded-3xl border border-white/5 bg-white/[0.03] p-5 transition-all hover:bg-white/[0.06] overflow-hidden">
                                     <div className="relative z-10">
-                                        <div className="flex justify-between items-start">
-                                            <p className="text-xs uppercase tracking-wider text-slate-400">Experience</p>
-                                            <div className="bg-blue-500/20 p-1.5 rounded-lg">
-                                                <Sparkles className="w-4 h-4 text-blue-400" />
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30">
+                                                <CheckCircle2 className="w-5 h-5" />
                                             </div>
+                                            <span className="text-[10px] font-black text-emerald-400/80 uppercase">Verified</span>
                                         </div>
-                                        <p className="mt-2 text-3xl font-extrabold text-blue-300 drop-shadow-[0_0_8px_rgba(96,165,250,0.4)]">{safeUser.totalXp} <span className="text-lg text-blue-400/70 uppercase">XP</span></p>
-                                        <p className="mt-1 text-xs text-blue-400/80 tracking-wide font-medium">{safeUser.levelLabel}</p>
+                                        <p className="text-3xl font-black text-white">{completionCount}</p>
+                                        <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mt-1">Certificates</p>
                                     </div>
-                                    <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue-500/10 rounded-full blur-xl pointer-events-none" />
-                                </Card>
+                                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                        <Trophy className="w-16 h-16" />
+                                    </div>
+                                </div>
                             </motion.div>
                         </motion.div>
                     </Card>
 
-                    <motion.div variants={itemVariants} className="flex items-center justify-between">
-                        <div>
-                            <h2 className="text-xl font-bold">Your Courses</h2>
-                            <p className="text-sm text-slate-400">Apple-grade UI with real momentum tracking.</p>
+                    <AnimatePresence>
+                        {discoverCourses.length > 0 && (
+                            <motion.section 
+                                variants={itemVariants}
+                                initial="hidden"
+                                animate="show"
+                                className="space-y-6 pt-4"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-purple-500/20 p-2 rounded-xl ring-1 ring-purple-500/30">
+                                            <Sparkles className="w-5 h-5 text-purple-400" />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-2xl font-black text-white leading-none">Discover New</h2>
+                                            <p className="text-xs font-bold text-slate-500 mt-1 uppercase tracking-widest">Recommended for you</p>
+                                        </div>
+                                    </div>
+                                    <Button variant="ghost" size="sm" onClick={() => window.location.href = '/student/browse'} className="text-purple-400">
+                                        Explore All
+                                    </Button>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    {discoverCourses.map((course, index) => (
+                                        <motion.div key={course.id} variants={itemVariants}>
+                                            <CourseCard 
+                                                course={course} 
+                                                index={index}
+                                                onOpen={(c) => window.location.href = `/student/browse?id=${c.id}`} 
+                                            />
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            </motion.section>
+                        )}
+                    </AnimatePresence>
+
+                    <motion.div variants={itemVariants} className="flex items-center justify-between pt-6 border-t border-white/5">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-blue-500/20 p-2 rounded-xl ring-1 ring-blue-500/30">
+                                <BookOpen className="w-5 h-5 text-blue-400" />
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-black text-white leading-none">Your Courses</h2>
+                                <p className="text-xs font-bold text-slate-500 mt-1 uppercase tracking-widest">Ongoing curriculum</p>
+                            </div>
                         </div>
-                        <Button variant="secondary" size="sm" leftIcon={<BookOpen className="h-4 w-4" />}>
-                            View Catalog
+                        <Button variant="secondary" size="sm" leftIcon={<Plus className="h-4 w-4" />} onClick={() => window.location.href = '/student/browse'}>
+                            Browse More
                         </Button>
                     </motion.div>
 

@@ -19,6 +19,7 @@ import { useAuth } from '../../context/AuthContext';
 import CourseReviews from './CourseReviews';
 import { UserRole } from '../../types';
 import { showError, showSuccess } from '../../utils/toast';
+import { cn } from '../../utils/cn';
 
 interface Lesson {
     title: string;
@@ -164,9 +165,8 @@ const BrowseCourses: React.FC = () => {
                 const mine = enrollmentMap.get(course._id);
                 const enrollmentStatus = mine?.enrollmentStatus ?? 'unknown';
 
-                // Determine free video limit based on grade level
-                const isHighSchool = ['Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].includes(course.gradeLevel || '');
-                const freeVideosLimit = isHighSchool ? 2 : 1;
+                // Determine free video limit: Standardized to 1 (Part 1 is always free)
+                const freeVideosLimit = 1;
 
                 return {
                     ...course,
@@ -539,64 +539,96 @@ const BrowseCourses: React.FC = () => {
                                             </p>
                                             <div className="space-y-2 text-sm">
                                                 {(!selectedCourse.lessons || selectedCourse.lessons.length === 0) ? (
-                                                    <div className="rounded-lg border border-slate-700 bg-slate-800/45 px-3 py-2 text-slate-200">
+                                                    <div className="rounded-xl border border-slate-700/50 bg-slate-800/25 px-4 py-8 text-center text-slate-400">
+                                                        <Clock3 className="mx-auto h-8 w-8 mb-3 opacity-20" />
                                                         No lessons available for this course yet.
                                                     </div>
                                                 ) : (
-                                                    selectedCourse.lessons.map((lesson, index) => {
-                                                        const isFreePreview = index < selectedCourse.freeVideosLimit;
-                                                        const isUnlocked = selectedCourse.hasFullAccess || isFreePreview;
-                                                        const isSelected = selectedLessonIndex === index;
+                                                    <div className="space-y-3">
+                                                        {selectedCourse.lessons.map((lesson, index) => {
+                                                            const isFreePreview = index < selectedCourse.freeVideosLimit;
+                                                            const isUnlocked = selectedCourse.hasFullAccess || isFreePreview;
+                                                            const isSelected = selectedLessonIndex === index;
 
-                                                        return (
-                                                            <button
-                                                                key={lesson._id || `lesson-${index}`}
-                                                                onClick={() => {
-                                                                    if (isUnlocked) {
-                                                                        setSelectedLessonIndex(index);
-                                                                    }
-                                                                }}
-                                                                disabled={!isUnlocked}
-                                                                className={`w-full flex items-center justify-between text-left rounded-lg border px-3 py-3 transition-colors ${
-                                                                    isSelected 
-                                                                        ? 'border-blue-400/50 bg-blue-500/20 text-white' 
-                                                                        : isUnlocked
-                                                                            ? 'border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700'
-                                                                            : 'border-slate-700/50 bg-slate-900/30 text-slate-500 cursor-not-allowed'
-                                                                }`}
-                                                            >
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ${
-                                                                        isSelected ? 'bg-blue-500 text-white' : isUnlocked ? 'bg-slate-700 text-slate-300' : 'bg-slate-800 text-slate-600'
-                                                                    }`}>
-                                                                        {index + 1}
+                                                            return (
+                                                                <button
+                                                                    key={lesson._id || `lesson-${index}`}
+                                                                    onClick={() => {
+                                                                        if (isUnlocked) {
+                                                                            setSelectedLessonIndex(index);
+                                                                        }
+                                                                    }}
+                                                                    className={cn(
+                                                                        'group w-full flex items-center justify-between text-left rounded-2xl border px-4 py-4 transition-all duration-300',
+                                                                        isSelected 
+                                                                            ? 'border-blue-400/50 bg-blue-500/15 shadow-[0_0_20px_rgba(59,130,246,0.15)] ring-1 ring-blue-400/20' 
+                                                                            : isUnlocked
+                                                                                ? 'border-slate-700/60 bg-slate-800/40 hover:bg-slate-700/60 hover:border-slate-500'
+                                                                                : 'border-slate-800/50 bg-slate-900/40 opacity-60 cursor-not-allowed'
+                                                                    )}
+                                                                >
+                                                                    <div className="flex items-center gap-4">
+                                                                        <div className={cn(
+                                                                            'flex items-center justify-center w-8 h-8 rounded-xl text-xs font-black transition-all duration-300',
+                                                                            isSelected 
+                                                                                ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30' 
+                                                                                : isUnlocked 
+                                                                                    ? 'bg-slate-700 text-slate-300 group-hover:bg-slate-600 group-hover:text-white' 
+                                                                                    : 'bg-slate-800 text-slate-600'
+                                                                        )}>
+                                                                            {String(index + 1).padStart(2, '0')}
+                                                                        </div>
+                                                                        <div>
+                                                                            <span className={cn(
+                                                                                'font-bold block transition-colors',
+                                                                                isSelected ? 'text-white' : isUnlocked ? 'text-slate-200' : 'text-slate-500'
+                                                                            )}>{lesson.title}</span>
+                                                                            {isFreePreview && !selectedCourse.hasFullAccess && (
+                                                                                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">🎁 Free Part</span>
+                                                                            )}
+                                                                        </div>
                                                                     </div>
-                                                                    <span className="font-medium line-clamp-1">{lesson.title}</span>
-                                                                </div>
-                                                                <div className="shrink-0 flex items-center">
-                                                                    {isFreePreview && !selectedCourse.hasFullAccess && (
-                                                                        <span className="mr-2 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded">Free</span>
-                                                                    )}
-                                                                    {isUnlocked ? (
-                                                                        <PlayCircle className={`w-4 h-4 ${isSelected ? 'text-blue-400' : 'text-slate-400'}`} />
-                                                                    ) : (
-                                                                        <Lock className="w-4 h-4 text-slate-600" />
-                                                                    )}
-                                                                </div>
-                                                            </button>
-                                                        );
-                                                    })
+                                                                    <div className="shrink-0 flex items-center gap-3">
+                                                                        {isUnlocked ? (
+                                                                            <PlayCircle className={cn(
+                                                                                'w-5 h-5 transition-transform duration-300 group-hover:scale-110',
+                                                                                isSelected ? 'text-blue-400' : 'text-slate-400 group-hover:text-blue-300'
+                                                                            )} />
+                                                                        ) : (
+                                                                            <div className="p-1.5 rounded-lg bg-slate-800/80 border border-slate-700">
+                                                                                <Lock className="w-3.5 h-3.5 text-slate-600" />
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
                                                 )}
 
                                                 {!selectedCourse.hasFullAccess && (
                                                     <motion.div
                                                         initial={{ opacity: 0, y: 10 }}
-                                                        animate={{ opacity: 1, y: 0 }}
-                                                        className="mt-4 rounded-lg border border-amber-400/35 bg-amber-500/10 px-3 py-3 text-amber-100 text-center text-sm"
+                                                        whileInView={{ opacity: 1, y: 0 }}
+                                                        className="mt-6 p-4 rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-transparent backdrop-blur-sm"
                                                     >
-                                                        {selectedCourse.enrollmentStatus === 'pending'
-                                                            ? 'Your enrollment is waiting for Admin Approval.'
-                                                            : `Lessons ${selectedCourse.freeVideosLimit + 1}+ are locked until enrollment is approved.`}
+                                                        <div className="flex gap-3">
+                                                            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center border border-amber-500/30">
+                                                                <Lock className="w-5 h-5 text-amber-400" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-bold text-amber-200 mb-1">
+                                                                    {selectedCourse.enrollmentStatus === 'pending'
+                                                                        ? 'Approval Pending'
+                                                                        : 'Unlock All Lessons'}
+                                                                </p>
+                                                                <p className="text-xs text-amber-100/70 leading-relaxed">
+                                                                    {selectedCourse.enrollmentStatus === 'pending'
+                                                                        ? 'Your payment record is being verified. You will get full access soon!'
+                                                                        : `Enjoy Part 1 for free! Enroll now to unlock ${selectedCourse.lessons?.length ? selectedCourse.lessons.length - 1 : 'the remaining'} expert-led sessions.`}
+                                                                </p>
+                                                            </div>
+                                                        </div>
                                                     </motion.div>
                                                 )}
                                             </div>

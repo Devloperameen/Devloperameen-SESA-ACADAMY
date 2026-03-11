@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/auth.js';
 import courseRoutes from './routes/courses.js';
+import courseManagementRoutes from './routes/courseManagement.js';
 import userRoutes from './routes/users.js';
 import categoryRoutes from './routes/categories.js';
 import adminRoutes from './routes/admin.js';
@@ -26,18 +27,30 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Security Middlewares
-app.use(helmet()); // Sets various HTTP headers for security
-app.use(cors({
-    origin: process.env.CORS_ORIGIN || '*', // Adjust for production
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+app.use(helmet({
+    contentSecurityPolicy: process.env.NODE_ENV === 'production',
+    crossOriginEmbedderPolicy: process.env.NODE_ENV === 'production',
 }));
+
+// CORS Configuration
+const corsOptions = {
+    origin: process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? false : '*'),
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    credentials: true,
+    optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 
 // Rate Limiting
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 10000, // Increased to prevent false positives in development
-    message: 'Too many requests from this IP, please try again after 15 minutes'
+    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes default
+    max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '1000'), // Limit each IP to requests per windowMs
+    message: 'Too many requests from this IP, please try again after 15 minutes',
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    skip: (req) => process.env.NODE_ENV === 'development' // Skip in development
 });
 app.use('/api/', limiter);
 
@@ -46,6 +59,7 @@ app.use(express.json({ limit: '10kb' })); // Body parser with size limit
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
+app.use('/api/course-management', courseManagementRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/categories', categoryRoutes);
@@ -71,9 +85,13 @@ const server = http.createServer(app);
 initSocket(server);
 
 // Database connection
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/sesa';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://<db_username>:<db_password>@cluster0.2amblcf.mongodb.net/sesa?retryWrites=true&w=majority&appName=Cluster0';
 
-mongoose.connect(MONGO_URI)
+const clientOptions = { 
+    serverApi: { version: '1', strict: true, deprecationErrors: true } 
+};
+
+mongoose.connect(MONGO_URI, clientOptions)
     .then(() => {
         console.log('Connected to MongoDB');
         server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

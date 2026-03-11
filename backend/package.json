@@ -13,20 +13,28 @@
     "socket.io": "^4.8.1",
     "tsx": "^4.21.0"
   },
-  "name": "backend",
+  "name": "sesa-backend",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
     "seed": "tsx src/utils/seed.ts",
     "seed:enhanced": "tsx src/utils/seedEnhanced.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "render-build": "npm run build",
+    "render-start": "npm start"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["education", "platform", "course-management", "mern"],
+  "author": "SESA Team",
   "license": "ISC",
-  "description": "",
+  "description": "Backend API for SESA Educational Platform with course management and access control",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.19",

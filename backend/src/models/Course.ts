@@ -41,8 +41,10 @@ export interface ICourse extends Document {
         text: string;
         createdAt: Date;
     }[];
-    status: 'pending' | 'approved' | 'rejected';
+    status: 'pending' | 'approved' | 'rejected' | 'locked' | 'hidden';
     adminComment?: string;
+    isHidden: boolean;
+    lockedAt?: Date;
     tags?: string[];
     level?: 'beginner' | 'intermediate' | 'advanced';
     gradeLevel?: 'Grade 9' | 'Grade 10' | 'Grade 11' | 'Grade 12' | 'General';
@@ -93,8 +95,10 @@ const CourseSchema: Schema = new Schema({
         text: { type: String, required: true, trim: true },
         createdAt: { type: Date, default: Date.now }
     }],
-    status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+    status: { type: String, enum: ['pending', 'approved', 'rejected', 'locked', 'hidden'], default: 'pending' },
     adminComment: { type: String },
+    isHidden: { type: Boolean, default: false },
+    lockedAt: { type: Date },
     tags: [{ type: String }],
     level: { type: String, enum: ['beginner', 'intermediate', 'advanced'] },
     gradeLevel: { type: String, enum: ['Grade 9', 'Grade 10', 'Grade 11', 'Grade 12', 'General'], default: 'General' },
