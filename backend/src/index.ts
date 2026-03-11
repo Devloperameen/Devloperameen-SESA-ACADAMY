@@ -35,10 +35,22 @@ app.use(helmet({
 }));
 
 // CORS Configuration
-// CORS Configuration
 const getCORSOrigins = () => {
     const originStr = process.env.CORS_ORIGIN;
-    if (!originStr) return process.env.NODE_ENV === 'production' ? false : '*';
+    const isProd = process.env.NODE_ENV === 'production';
+    
+    console.log(`[Config] NODE_ENV: ${process.env.NODE_ENV || 'not set'}`);
+    console.log(`[Config] CORS_ORIGIN: ${originStr || 'not set'}`);
+
+    if (!originStr) {
+        if (isProd) {
+            console.warn('⚠️ WARNING: CORS_ORIGIN is not set in production. Security will be strict.');
+            return false;
+        }
+        return '*';
+    }
+    
+    if (originStr === '*') return '*';
     
     // Split by comma if it's a string of origins
     if (originStr.includes(',')) {
@@ -48,12 +60,12 @@ const getCORSOrigins = () => {
 };
 
 const allowedOrigin = getCORSOrigins();
-console.log(`[CORS] Allowed origin(s): ${Array.isArray(allowedOrigin) ? allowedOrigin.join(', ') : allowedOrigin}`);
+console.log(`[CORS] Active allowed origin(s): ${Array.isArray(allowedOrigin) ? allowedOrigin.join(', ') : allowedOrigin}`);
 
 const corsOptions = {
     origin: allowedOrigin,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
     credentials: true,
     optionsSuccessStatus: 200
 };
