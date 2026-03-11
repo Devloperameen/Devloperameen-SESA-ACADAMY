@@ -70,7 +70,8 @@ export const requireFullAccess = async (req: AuthRequest, res: Response, next: N
         }
 
         // For students, check if they have access to current lesson
-        const lessonIndex = parseInt(req.params.lessonIndex || '0');
+        const lessonIndexStr = req.params.lessonIndex as string;
+        const lessonIndex = parseInt(lessonIndexStr || '0');
         
         // Part 1 (index 0) is always free
         if (lessonIndex === 0) {

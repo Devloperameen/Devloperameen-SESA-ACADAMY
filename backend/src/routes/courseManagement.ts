@@ -92,7 +92,7 @@ router.get('/courses/:courseId/lesson/:lessonIndex',
     async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
             const { courseId, lessonIndex } = req.params;
-            const index = parseInt(lessonIndex);
+            const index = parseInt(lessonIndex as string);
 
             // Part 1 (index 0) is always free
             if (index === 0) {
@@ -109,7 +109,7 @@ router.get('/courses/:courseId/lesson/:lessonIndex',
     async (req: AuthRequest, res: Response) => {
         try {
             const { courseId, lessonIndex } = req.params;
-            const index = parseInt(lessonIndex);
+            const index = parseInt(lessonIndex as string);
 
             const course = req.course;
             if (!course || index >= course.lessons.length) {

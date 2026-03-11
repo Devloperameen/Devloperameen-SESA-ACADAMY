@@ -365,7 +365,7 @@ export const verifyEnrollmentAndGrantAccess = async (req: AuthRequest, res: Resp
         // Notify student
         notifyUser(
             enrollment.user._id.toString(),
-            `Your enrollment for "${enrollment.course.title}" has been verified! You now have full access.`,
+            `Your enrollment for "${(enrollment.course as any).title}" has been verified! You now have full access.`,
             { courseId: enrollment.course._id, status: 'approved' }
         );
 
