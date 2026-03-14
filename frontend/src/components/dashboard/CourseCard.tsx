@@ -19,6 +19,7 @@ export interface StudentCourse {
     tags?: string[];
     isLive?: boolean;
     lastOpenedLabel?: string;
+    instructorId: string;
     enrollmentStatus?: 'approved' | 'pending' | 'rejected' | 'unknown';
 }
 

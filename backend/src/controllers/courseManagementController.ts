@@ -275,7 +275,7 @@ export const getEnrollmentsForVerification = async (req: AuthRequest, res: Respo
 
         // Get payments for these enrollments
         const enrollmentsWithPayments = await Promise.all(
-            pendingEnrollments.map(async (enrollment) => {
+            pendingEnrollments.map(async (enrollment: any) => {
                 const payment = await Payment.findOne({
                     user: enrollment.user._id,
                     course: enrollment.course._id
@@ -284,6 +284,12 @@ export const getEnrollmentsForVerification = async (req: AuthRequest, res: Respo
                 return {
                     enrollment,
                     payment,
+                    // Provide fallback metadata from enrollment if payment record is missing
+                    paymentMetadata: {
+                        method: payment?.paymentMethod || enrollment.paymentMethod || 'bank_transfer',
+                        transactionId: payment?.transactionId || enrollment.transactionId,
+                        proofUrl: payment?.receiptImage || enrollment.paymentProofUrl
+                    },
                     requiresVerification: payment ? payment.status === 'pending' : true
                 };
             })

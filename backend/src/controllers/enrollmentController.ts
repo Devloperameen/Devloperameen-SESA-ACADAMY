@@ -13,7 +13,7 @@ import { notifyUser } from '../utils/socket.js';
 export const requestAccess = async (req: AuthRequest, res: Response) => {
     try {
         const { courseId } = req.params;
-        const { paymentProofUrl } = req.body;
+        const { paymentProofUrl, paymentMethod, transactionId } = req.body;
         const userId = req.user?.id;
 
         if (!userId) {
@@ -43,6 +43,8 @@ export const requestAccess = async (req: AuthRequest, res: Response) => {
             // If rejected, allow re-requesting (updating status to pending)
             enrollment.status = 'pending';
             enrollment.paymentProofUrl = paymentProofUrl;
+            enrollment.paymentMethod = paymentMethod || 'bank_transfer';
+            enrollment.transactionId = transactionId;
             enrollment.requestedAt = new Date();
             await enrollment.save();
         } else {
@@ -51,6 +53,8 @@ export const requestAccess = async (req: AuthRequest, res: Response) => {
                 user: new mongoose.Types.ObjectId(userId),
                 course: new mongoose.Types.ObjectId(courseId as string),
                 paymentProofUrl,
+                paymentMethod: paymentMethod || 'bank_transfer',
+                transactionId,
                 status: 'pending'
             });
             await enrollment.save();

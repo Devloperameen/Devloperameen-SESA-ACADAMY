@@ -5,7 +5,10 @@ import {
     createQuiz,
     getCourseQuizzes,
     createAssignment,
-    submitAssessment
+    submitAssessment,
+    updateMark,
+    getStudentGradebook,
+    getCourseGradebook
 } from '../controllers/assessmentController.js';
 
 const router = express.Router();
@@ -26,5 +29,19 @@ router.post('/course/:courseId/assignment',
 // Public/Student routes
 router.get('/course/:courseId/quizzes', authenticate, getCourseQuizzes);
 router.post('/submit', authenticate, submitAssessment);
+router.get('/gradebook/:courseId', authenticate, getStudentGradebook);
+
+// Mark Management
+router.post('/mark', 
+    authenticate, 
+    checkRole([UserRole.INSTRUCTOR, UserRole.ADMIN, UserRole.SUPER_ADMIN]), 
+    updateMark
+);
+
+router.get('/gradebook/all/:courseId',
+    authenticate,
+    checkRole([UserRole.INSTRUCTOR, UserRole.ADMIN, UserRole.SUPER_ADMIN]),
+    getCourseGradebook
+);
 
 export default router;

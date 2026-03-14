@@ -7,7 +7,8 @@ import ForumThread from '../models/Forum.js';
  */
 export const createThread = async (req: AuthRequest, res: Response) => {
     try {
-        const { courseId, title, text } = req.body;
+        const { courseId, title, text, content } = req.body;
+        const messageText = content || text;
         const thread = new ForumThread({
             course: courseId,
             title,
@@ -15,7 +16,7 @@ export const createThread = async (req: AuthRequest, res: Response) => {
             posts: [{
                 user: req.user!.id,
                 userName: req.user!.name,
-                text
+                text: messageText
             }]
         });
         await thread.save();
@@ -44,14 +45,15 @@ export const getCourseThreads = async (req: AuthRequest, res: Response) => {
 export const addPost = async (req: AuthRequest, res: Response) => {
     try {
         const { threadId } = req.params;
-        const { text } = req.body;
+        const { text, content } = req.body;
+        const messageText = content || text;
         const thread = await ForumThread.findById(threadId);
         if (!thread) return res.status(404).json({ message: 'Thread not found' });
 
         thread.posts.push({
             user: req.user!.id as any,
             userName: req.user!.name,
-            text,
+            text: messageText,
             createdAt: new Date()
         });
         await thread.save();

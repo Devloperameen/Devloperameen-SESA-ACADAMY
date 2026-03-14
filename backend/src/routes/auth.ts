@@ -25,12 +25,17 @@ router.post(
         body('name', 'Name is required').trim().notEmpty().escape(),
         body('email', 'Please include a valid email').isEmail().normalizeEmail(),
         body('password', 'Please enter a password with 6 or more characters').isLength({ min: 6 }),
-        body('role', 'Valid role is required').isIn([UserRole.STUDENT, UserRole.INSTRUCTOR, UserRole.ADMIN])
+        body('role', 'Valid role is required').optional().isIn([UserRole.STUDENT, UserRole.INSTRUCTOR])
     ],
     validate,
     async (req: Request, res: Response) => {
         try {
-            const { name, email, password, role } = req.body;
+            const { name, email, password } = req.body;
+            const role = req.body.role || UserRole.STUDENT;
+
+            if (role === UserRole.ADMIN || role === UserRole.SUPER_ADMIN) {
+                return res.status(403).json({ message: 'Admin accounts cannot be created through registration.' });
+            }
 
             // Check if user exists
             let user = await User.findOne({ email });

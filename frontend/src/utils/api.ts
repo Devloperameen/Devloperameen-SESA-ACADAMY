@@ -202,6 +202,93 @@ export const apiService = {
       api.get('/search/suggestions', { params: { q } }),
   },
 
+  // Assessment & Gradebook endpoints
+  assessments: {
+    getStudentGradebook: (courseId: string) =>
+      api.get(`/assessments/gradebook/${courseId}`),
+    updateMark: (data: { studentId: string, courseId: string, assessmentType: string, score: number, feedback?: string }) =>
+      api.post('/assessments/mark', data),
+    getCourseGradebook: (courseId: string) =>
+      api.get(`/assessments/gradebook/all/${courseId}`),
+    submit: (data: any) =>
+      api.post('/assessments/submit', data),
+  },
+
+  // Evaluation endpoints
+  evaluations: {
+    submit: (data: { courseId: string, instructorId: string, ratings: any, feedback? : string }) =>
+      api.post('/evaluations', data),
+    getInstructorEvaluations: (instructorId: string) =>
+      api.get(`/evaluations/instructor/${instructorId}`),
+  },
+
+  // Video workflow & lesson access endpoints
+  videoWorkflow: {
+    // Lessons visible to a student for a given course
+    getAccessibleLessons: (courseId: string) =>
+      api.get(`/video-workflow/courses/${courseId}/lessons`),
+
+    // Start a payment to unlock a specific lesson
+    processLessonPayment: (
+      lessonId: string,
+      data: { paymentMethod: 'stripe' | 'paypal' | 'manual'; amount: number },
+    ) =>
+      api.post(`/video-workflow/lessons/${lessonId}/payment`, data),
+
+    // Teacher: upload a lesson video (multipart/form-data)
+    uploadVideo: (formData: FormData) =>
+      api.post('/video-workflow/videos/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }),
+
+    // Admin / moderator: list pending videos for review
+    getPendingVideos: (params?: { page?: number; limit?: number }) =>
+      api.get('/video-workflow/videos/pending', { params }),
+
+    // Admin / moderator: approve or reject a video
+    reviewVideo: (
+      videoId: string,
+      data: { decision: 'approved' | 'rejected'; feedback?: string; notes?: string },
+    ) =>
+      api.put(`/video-workflow/videos/${videoId}/review`, data),
+
+    // Student: upload a lesson screenshot (multipart/form-data)
+    uploadScreenshot: (formData: FormData) =>
+      api.post('/video-workflow/screenshots/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }),
+
+    // Admin / moderator: list screenshots awaiting review
+    getScreenshotsForReview: (params?: {
+      courseId?: string;
+      lessonId?: string;
+      page?: number;
+      limit?: number;
+    }) =>
+      api.get('/video-workflow/screenshots/review', { params }),
+
+    // Admin / moderator: review a specific screenshot
+    reviewScreenshot: (
+      screenshotId: string,
+      data: { approved: boolean; feedback?: string; flagged?: boolean; flagReason?: string },
+    ) =>
+      api.put(`/video-workflow/screenshots/${screenshotId}/review`, data),
+
+    // Public: serve uploaded video/screenshot by type and filename
+    getUploadUrl: (type: 'videos' | 'screenshots', filename: string) =>
+      `${API_BASE_URL.replace(/\/api$/, '')}/api/video-workflow/uploads/${type}/${filename}`,
+  },
+
+  // AI / assistant endpoints
+  ai: {
+    chat: (message: string, context?: string) =>
+      api.post('/ai/chat', { message, context }),
+    generateLesson: (topic: string, level?: string, language?: string) =>
+      api.post('/ai/generate-lesson', { topic, level, language }),
+    summarize: (text: string, maxSentences?: number) =>
+      api.post('/ai/summarize', { text, maxSentences }),
+  },
+
   // Utility function to check API health
   healthCheck: () => api.get('/health'),
 };

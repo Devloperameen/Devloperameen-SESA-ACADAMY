@@ -126,14 +126,101 @@ export const submitAssessment = async (req: AuthRequest, res: Response) => {
                 answers.forEach((ans: any, idx: number) => {
                     if (ans === quiz.questions[idx].correctAnswer) correctCount++;
                 });
-                submission.score = (correctCount / quiz.questions[idx].options.length) * 100; // Need proper scoring logic
-                // Simple score for now
+                // Simple score based on total questions
                 submission.score = Math.round((correctCount / quiz.questions.length) * 100);
             }
         }
 
         await submission.save();
         res.status(201).json(submission);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// ─── GRADEBOOK CONTROLLERS ───────────────────────────────────────────────────
+
+/**
+ * @desc    Add or update a manual mark (Midterm, Final, etc.)
+ */
+export const updateMark = async (req: AuthRequest, res: Response) => {
+    try {
+        const { studentId, courseId, assessmentType, score, feedback } = req.body;
+
+        const course = await Course.findById(courseId);
+        if (!course) return res.status(404).json({ message: 'Course not found' });
+
+        // Authorization: Instructor or Admin
+        if (course.instructor.toString() !== req.user!.id && req.user!.role !== 'admin') {
+            return res.status(403).json({ message: 'Not authorized to award marks' });
+        }
+
+        // Upsert submission as the record of truth for the mark
+        const query = {
+            user: studentId,
+            course: courseId,
+            assessmentType
+        };
+
+        const update = {
+            score,
+            feedback,
+            status: 'graded',
+            gradedBy: req.user!.id,
+            gradedAt: new Date(),
+            submittedAt: new Date() // For manual marks, submission = grading
+        };
+
+        const submission = await Submission.findOneAndUpdate(query, update, {
+            new: true,
+            upsert: true
+        });
+
+        res.json(submission);
+    } catch (error) {
+        console.error('Update mark error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+/**
+ * @desc    Get gradebook for a course (Student view)
+ */
+export const getStudentGradebook = async (req: AuthRequest, res: Response) => {
+    try {
+        const { courseId } = req.params;
+        const userId = req.user!.id;
+
+        const marks = await Submission.find({
+            user: userId,
+            course: courseId
+        }).select('assessmentType score feedback status gradedAt');
+
+        res.json(marks);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+/**
+ * @desc    Get full gradebook for a course (Instructor/Admin view)
+ */
+export const getCourseGradebook = async (req: AuthRequest, res: Response) => {
+    try {
+        const { courseId } = req.params;
+
+        const course = await Course.findById(courseId);
+        if (!course) return res.status(404).json({ message: 'Course not found' });
+
+        if (course.instructor.toString() !== req.user!.id && req.user!.role !== 'admin') {
+            return res.status(403).json({ message: 'Not authorized' });
+        }
+
+        const gradebook = await Submission.find({ course: courseId })
+            .populate('user', 'name email')
+            .select('user assessmentType score status');
+
+        res.json(gradebook);
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
     }

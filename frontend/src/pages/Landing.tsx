@@ -21,84 +21,31 @@ const Fade: React.FC<{ children: React.ReactNode; className?: string; id?: strin
     return <motion.section ref={ref} id={id} initial={{ opacity: 0, y: 40 }} animate={iv ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }} className={className}>{children}</motion.section>;
 };
 
-/* ─── quotes ─── */
 const QS = [
-   { t: "Education is the key that unlocks the golden door of freedom.", a: "George Washington Carver", e: "🔑" },
-{ t: "Learning is a treasure that will follow its owner everywhere.", a: "Chinese Proverb", e: "📖" },
-{ t: "The expert in anything was once a beginner.", a: "Helen Hayes", e: "🌱" },
-{ t: "Success usually comes to those who are too busy to be looking for it.", a: "Henry David Thoreau", e: "🏆" },
-{ t: "Develop a passion for learning. If you do, you will never cease to grow.", a: "Anthony J. D'Angelo", e: "🌿" },
-{ t: "The future depends on what you do today.", a: "Mahatma Gandhi", e: "🌍" },
-{ t: "It does not matter how slowly you go as long as you do not stop.", a: "Confucius", e: "🐢" },
-{ t: "Don’t let what you cannot do interfere with what you can do.", a: "John Wooden", e: "💪" },
-{ t: "The more that you read, the more things you will know.", a: "Dr. Seuss", e: "📚" },
-{ t: "Education is not preparation for life; education is life itself.", a: "John Dewey", e: "🎓" },
-{ t: "Wisdom begins in wonder.", a: "Socrates", e: "🤔" },
-{ t: "Self-discipline is the magic power that makes you virtually unstoppable.", a: "Dan Kennedy", e: "🧭" },
-{ t: "Great works are performed not by strength but by perseverance.", a: "Samuel Johnson", e: "🏗️" },
-{ t: "Learning never exhausts the mind.", a: "Leonardo da Vinci", e: "🧠" },
-{ t: "Quality means doing it right when no one is looking.", a: "Henry Ford", e: "✔️" },
-{ t: "You don’t have to be great to start, but you have to start to be great.", a: "Zig Ziglar", e: "🚀" },
-{ t: "Small daily improvements over time lead to stunning results.", a: "Robin Sharma", e: "📈" },
-{ t: "Reading is to the mind what exercise is to the body.", a: "Joseph Addison", e: "🏋️" },
-{ t: "Knowledge speaks, but wisdom listens.", a: "Jimi Hendrix", e: "👂" },
-{ t: "Success is the sum of small efforts repeated daily.", a: "Robert Collier", e: "📊" },
-
-{ t: "The beautiful thing about learning is nobody can take it away from you.", a: "B.B. King", e: "📚" },
-{ t: "Curiosity is the wick in the candle of learning.", a: "William Arthur Ward", e: "🕯️" },
-{ t: "Discipline today creates success tomorrow.", a: "Unknown", e: "🌅" },
-{ t: "Practice makes progress.", a: "Unknown", e: "🎯" },
-{ t: "Stay patient and trust your journey.", a: "Unknown", e: "🛤️" },
-{ t: "Hard work beats talent when talent doesn’t work hard.", a: "Tim Notke", e: "🔥" },
-{ t: "Education breeds confidence. Confidence breeds hope.", a: "Confucius", e: "🌟" },
-{ t: "The secret of success is constancy of purpose.", a: "Benjamin Disraeli", e: "🎯" },
-{ t: "A little progress each day adds up to big results.", a: "Unknown", e: "📈" },
-{ t: "Success is built on discipline and determination.", a: "Unknown", e: "🏗️" },
-
-{ t: "Dream big. Start small. Act now.", a: "Robin Sharma", e: "✨" },
-{ t: "Your education is a dress rehearsal for a life that is yours to lead.", a: "Nora Ephron", e: "🎓" },
-{ t: "Effort is what ignites ability.", a: "John C. Maxwell", e: "⚡" },
-{ t: "A goal without a plan is just a wish.", a: "Antoine de Saint-Exupéry", e: "🗺️" },
-{ t: "Success is not in what you have, but who you are.", a: "Bo Bennett", e: "💎" },
-{ t: "The best way to predict your future is to create it.", a: "Peter Drucker", e: "🛠️" },
-{ t: "Consistency is more important than perfection.", a: "Unknown", e: "📅" },
-{ t: "Learn something new every day.", a: "Unknown", e: "🌱" },
-{ t: "The harder you work, the luckier you get.", a: "Gary Player", e: "🍀" },
-{ t: "Never stop learning, because life never stops teaching.", a: "Unknown", e: "📖" },
-
-{ t: "Great minds discuss ideas.", a: "Eleanor Roosevelt", e: "💡" },
-{ t: "Be stronger than your excuses.", a: "Unknown", e: "💪" },
-{ t: "Education is the movement from darkness to light.", a: "Allan Bloom", e: "🌅" },
-{ t: "The roots of education are bitter, but the fruit is sweet.", a: "Aristotle", e: "🍎" },
-{ t: "Success starts with self-belief.", a: "Unknown", e: "🌟" },
-{ t: "Your future is created by what you do today.", a: "Robert Kiyosaki", e: "🏗️" },
-{ t: "Work hard in silence; let your results speak.", a: "Unknown", e: "🔇" },
-{ t: "Knowledge grows when shared.", a: "Unknown", e: "🤝" },
-{ t: "Patience and persistence make an unbeatable combination.", a: "Napoleon Hill", e: "⏳" },
-{ t: "Stay focused and never give up.", a: "Unknown", e: "🎯" },
-
-{ t: "Education is the foundation of every nation.", a: "Kofi Annan", e: "🌍" },
-{ t: "Success is earned, not given.", a: "Unknown", e: "🏆" },
-{ t: "Think big and don’t listen to people who tell you it can’t be done.", a: "Tim Ferriss", e: "🚀" },
-{ t: "Failure is the opportunity to begin again.", a: "Henry Ford", e: "🔄" },
-{ t: "Be curious, not judgmental.", a: "Walt Whitman", e: "🧐" },
-{ t: "Every accomplishment starts with the decision to try.", a: "John F. Kennedy", e: "🎯" },
-{ t: "Stay hungry for knowledge.", a: "Unknown", e: "📚" },
-{ t: "Confidence comes from discipline and training.", a: "Robert Kiyosaki", e: "💪" },
-{ t: "Learning is a lifelong journey.", a: "Unknown", e: "🛤️" },
-{ t: "Push yourself beyond your limits.", a: "Unknown", e: "🔥" },
-
-{ t: "Education is the passport to the future.", a: "Malcolm X", e: "🛂" },
-{ t: "Your attitude determines your direction.", a: "Unknown", e: "🧭" },
-{ t: "Strive for progress, not perfection.", a: "Unknown", e: "📈" },
-{ t: "Knowledge opens doors.", a: "Unknown", e: "🚪" },
-{ t: "Success requires preparation and dedication.", a: "Unknown", e: "📘" },
-{ t: "Be disciplined. Be determined. Be successful.", a: "Unknown", e: "🏆" },
-{ t: "The best investment you can make is in yourself.", a: "Warren Buffett", e: "💰" },
-{ t: "Learn from yesterday, live for today, hope for tomorrow.", a: "Albert Einstein", e: "🌅" },
-{ t: "Stay positive. Work hard. Make it happen.", a: "Unknown", e: "⚡" },
-{ t: "Education gives you wings to fly.", a: "Unknown", e: "🕊️" }
-
+    { t: "Curiosity is the wick in the candle of learning.", a: "William Arthur Ward", e: "🕯️", c: "Curiosity" },
+    { t: "Wisdom begins in wonder.", a: "Socrates", e: "🤔", c: "Curiosity" },
+    { t: "Be curious, not judgmental.", a: "Walt Whitman", e: "🧐", c: "Curiosity" },
+    { t: "Stay hungry for knowledge.", a: "Unknown", e: "📚", c: "Curiosity" },
+    
+    { t: "Success is the sum of small efforts repeated daily.", a: "Robert Collier", e: "📊", c: "Success" },
+    { t: "The secret of success is constancy of purpose.", a: "Benjamin Disraeli", e: "🎯", c: "Success" },
+    { t: "Success usually comes to those who are too busy to be looking for it.", a: "Henry David Thoreau", e: "🏆", c: "Success" },
+    { t: "Success is earned, not given.", a: "Unknown", e: "🏆", c: "Success" },
+    
+    { t: "Education is the passport to the future.", a: "Malcolm X", e: "🛂", c: "Education" },
+    { t: "The beautiful thing about learning is nobody can take it away from you.", a: "B.B. King", e: "📚", c: "Education" },
+    { t: "Education is the movement from darkness to light.", a: "Allan Bloom", e: "🌅", c: "Education" },
+    { t: "Education is the foundation of every nation.", a: "Kofi Annan", e: "🌍", c: "Education" },
+    
+    { t: "Self-discipline is the magic power that makes you virtually unstoppable.", a: "Dan Kennedy", e: "🧭", c: "Discipline" },
+    { t: "Discipline today creates success tomorrow.", a: "Unknown", e: "🌅", c: "Discipline" },
+    { t: "Be stronger than your excuses.", a: "Unknown", e: "💪", c: "Discipline" },
+    { t: "Confidence comes from discipline and training.", a: "Robert Kiyosaki", e: "💪", c: "Discipline" },
+    
+    { t: "Small daily improvements over time lead to stunning results.", a: "Robin Sharma", e: "📈", c: "Productivity" },
+    { t: "Your future is created by what you do today.", a: "Robert Kiyosaki", e: "🏗️", c: "Productivity" },
+    { t: "Consistency is more important than perfection.", a: "Unknown", e: "📅", c: "Productivity" },
+    { t: "Stay positive. Work hard. Make it happen.", a: "Unknown", e: "⚡", c: "Productivity" }
 ];
 
 // Rotating background images for hero section
@@ -123,10 +70,14 @@ const Landing: React.FC = () => {
     const [qi, setQi] = useState(0);
     const [heroIndex, setHeroIndex] = useState(0);
     const [searchQuery, setSearchQuery] = useState('');
-
     const [activeMotivationCat, setActiveMotivationCat] = useState('Success');
-    
+
     const motivationCategories = {
+        Curiosity: [
+            { id: 'ZXGWYe01Ya8', title: 'The Power of Curiosity', author: 'Jim Rohn' },
+            { id: 'ks2QSk09ndE', title: 'Why You Must Ask Why', author: 'Education First' },
+            { id: 'v27H868X9kY', title: 'Finding Your Purpose', author: 'Productivity Pro' }
+        ],
         Success: [
             { id: 'ZXGWYe01Ya8', title: 'The Power of Persistence', author: 'Jim Rohn' },
             { id: 'tPnK6Ba4fS4', title: 'How to Achieve Your Goals', author: 'SESA Academy' },
@@ -139,13 +90,41 @@ const Landing: React.FC = () => {
         ],
         Discipline: [
             { id: 'vMv3vGfF0L8', title: 'The Secret to Discipline', author: 'Jocko Willink' },
-            { id: '2VDSpxX88pA', title: 'The 5 AM Club Strategy', author: 'Robin Sharma' }
+            { id: '2VDSpxX88pA', title: 'The 5 AM Club Strategy', author: 'Robin Sharma' },
+            { id: 'W0v_7nyZ_16', title: 'Internal Strength', author: 'Work Ethic' }
         ],
         Productivity: [
             { id: 'W0v_7nyZ_16', title: 'Master Your Time', author: 'Work Ethic' },
-            { id: 'v27H868X9kY', title: 'Stop Procrastinating Now', author: 'Productivity Pro' }
+            { id: 'v27H868X9kY', title: 'Stop Procrastinating Now', author: 'Productivity Pro' },
+            { id: 'ks2QSk09ndE', title: 'Deep Work Principles', author: 'Cal Newport' }
         ]
     };
+
+    const [isWatching, setIsWatching] = useState(false);
+    const [videoIndex, setVideoIndex] = useState(0); // Offset for 2 videos
+
+    // Switching Logic: 10 minutes if not watching
+    useEffect(() => {
+        if (isWatching) return; // Wait if watching
+
+        const interval = setInterval(() => {
+            setVideoIndex((prev) => {
+                const total = motivationCategories[activeMotivationCat as keyof typeof motivationCategories].length;
+                return (prev + 2) % total;
+            });
+        }, 10 * 60 * 1000); // 10 minutes
+
+        return () => clearInterval(interval);
+    }, [isWatching, activeMotivationCat, motivationCategories]);
+
+    useEffect(() => {
+        setVideoIndex(0);
+        setIsWatching(false);
+    }, [activeMotivationCat]);
+
+    const activeQuotes = QS.filter(quote => quote.c === activeMotivationCat);
+    const q = activeQuotes[qi % activeQuotes.length] || QS[0];
+
     const [selectedImage, setSelectedImage] = useState<{ img: string; title: string } | null>(null);
     const nq = () => { let n; do { n = Math.floor(Math.random() * QS.length); } while (n === qi); setQi(n); };
     useEffect(() => { const id = setInterval(nq, 7000); return () => clearInterval(id); }, [qi]);
@@ -189,7 +168,6 @@ const Landing: React.FC = () => {
         { title: t('Software Eng — Part 1', 'ሶፍትዌር ኢንጅ — ክፍል 1'), emoji: '💻', color: 'border-purple-500', vid: 'https://www.youtube.com/embed/ZXGWYe01Ya8?autoplay=0' },
     ];
 
-    const q = QS[qi];
 
     return (
         <div className="overflow-hidden relative">
@@ -517,30 +495,43 @@ const Landing: React.FC = () => {
                         <div className="lg:col-span-7">
                             <AnimatePresence mode="wait">
                                 <motion.div
-                                    key={activeMotivationCat}
+                                    key={activeMotivationCat + videoIndex}
                                     initial={{ opacity: 0, x: 30 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: -30 }}
                                     className="grid sm:grid-cols-2 gap-4"
                                 >
-                                    {motivationCategories[activeMotivationCat as keyof typeof motivationCategories].map((vid, idx) => (
+                                    {motivationCategories[activeMotivationCat as keyof typeof motivationCategories]
+                                        .slice(videoIndex, videoIndex + 2)
+                                        .map((vid, idx) => (
                                         <motion.div
                                             key={vid.id}
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: idx * 0.1 }}
-                                            className="group relative rounded-3xl overflow-hidden shadow-premium bg-black aspect-video"
+                                            className="group relative rounded-3xl overflow-hidden shadow-premium bg-black aspect-video cursor-pointer"
+                                            onClick={() => setIsWatching(true)}
                                         >
                                             <iframe 
                                                 className="w-full h-full border-none opacity-80 group-hover:opacity-100 transition-opacity" 
-                                                src={`https://www.youtube.com/embed/${vid.id}?autoplay=0&mute=0`} 
+                                                src={`https://www.youtube.com/embed/${vid.id}?autoplay=0&mute=0&enablejsapi=1`} 
                                                 title={vid.title}
                                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                                                 allowFullScreen 
                                             />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-100 pointer-events-none p-5 flex flex-col justify-end">
-                                                <p className="text-white font-black text-sm group-hover:text-primary transition-colors">{vid.title}</p>
-                                                <p className="text-white/50 text-[10px] uppercase font-bold tracking-wider">{vid.author}</p>
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <p className="text-white font-black text-sm group-hover:text-primary transition-colors">{vid.title}</p>
+                                                        <p className="text-white/50 text-[10px] uppercase font-bold tracking-wider">{vid.author}</p>
+                                                    </div>
+                                                    {isWatching && (
+                                                        <div className="flex items-center gap-1 px-2 py-1 bg-primary/20 text-primary rounded-full text-[10px] font-black uppercase">
+                                                            <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                                                            Watching
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                             <div className="absolute top-4 right-4 p-2 bg-white/10 backdrop-blur-md rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <Play className="w-4 h-4 text-white" />
@@ -549,6 +540,16 @@ const Landing: React.FC = () => {
                                     ))}
                                 </motion.div>
                             </AnimatePresence>
+                            
+                            <div className="mt-4 flex justify-between items-center text-xs font-bold text-gray-400">
+                                <p>{t('Showing 2 of', 'ከቀረቡት 2ቱ')} {motivationCategories[activeMotivationCat as keyof typeof motivationCategories].length}</p>
+                                <button 
+                                    onClick={() => setVideoIndex((prev) => (prev + 2) % motivationCategories[activeMotivationCat as keyof typeof motivationCategories].length)}
+                                    className="text-primary hover:underline flex items-center gap-1"
+                                >
+                                    <RefreshCcw className="w-3 h-3" /> {t('Switch Videos', 'ቪዲዮዎችን ቀይር')}
+                                </button>
+                            </div>
                             
                             <motion.div 
                                 initial={{ opacity: 0 }}

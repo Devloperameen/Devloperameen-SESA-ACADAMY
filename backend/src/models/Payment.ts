@@ -5,9 +5,10 @@ export interface IPayment extends Document {
     course: mongoose.Types.ObjectId;
     amount: number;
     currency: string;
-    paymentMethod: 'stripe' | 'paypal' | 'bank_transfer' | 'cash';
+    paymentMethod: 'stripe' | 'paypal' | 'bank_transfer' | 'cash' | 'chapa' | 'telebirr' | 'cbe_birr';
     status: 'pending' | 'completed' | 'failed' | 'refunded';
     transactionId?: string;
+    receiptImage?: string; // For bank transfers & proof of payment
     paymentDate: Date;
     metadata?: Record<string, any>;
     createdAt: Date;
@@ -21,7 +22,7 @@ const PaymentSchema: Schema = new Schema({
     currency: { type: String, default: 'USD' },
     paymentMethod: { 
         type: String, 
-        enum: ['stripe', 'paypal', 'bank_transfer', 'cash'],
+        enum: ['stripe', 'paypal', 'bank_transfer', 'cash', 'chapa', 'telebirr', 'cbe_birr'],
         required: true 
     },
     status: { 
@@ -30,6 +31,7 @@ const PaymentSchema: Schema = new Schema({
         default: 'pending'
     },
     transactionId: { type: String },
+    receiptImage: { type: String },
     paymentDate: { type: Date, default: Date.now },
     metadata: { type: Schema.Types.Mixed },
     createdAt: { type: Date, default: Date.now },

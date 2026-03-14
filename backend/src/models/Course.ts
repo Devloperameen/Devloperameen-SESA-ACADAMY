@@ -117,7 +117,7 @@ const CourseSchema: Schema = new Schema({
     lockedAt: { type: Date },
     tags: [{ type: String }],
     level: { type: String, enum: ['beginner', 'intermediate', 'advanced'] },
-    gradeLevel: { type: String, enum: ['Grade 9', 'Grade 10', 'Grade 11', 'Grade 12', 'General'], default: 'General' },
+    gradeLevel: { type: String, enum: ['Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12', 'General'], default: 'General' },
     duration: { type: String },
     price: { type: Number, default: 0, min: 0 },
     isPublished: { type: Boolean, default: true },

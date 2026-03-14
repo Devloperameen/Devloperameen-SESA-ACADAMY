@@ -10,6 +10,8 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.3",
+    "multer": "^2.1.1",
+    "openai": "^4.9.0",
     "socket.io": "^4.8.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
@@ -28,7 +30,12 @@
     "render-build": "tsc",
     "render-start": "node dist/index.js"
   },
-  "keywords": ["education", "platform", "course-management", "mern"],
+  "keywords": [
+    "education",
+    "platform",
+    "course-management",
+    "mern"
+  ],
   "author": "SESA Team",
   "license": "ISC",
   "description": "Backend API for SESA Educational Platform with course management and access control",

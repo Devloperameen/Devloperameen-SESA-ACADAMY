@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, X, Send, Sparkles, Loader2, User, Trash2, ChevronRight } from 'lucide-react';
+import apiService from '../utils/api';
 
 interface ChatMessage {
     id: string;
@@ -40,108 +41,17 @@ const AIHelper: React.FC = () => {
         if (isOpen) scrollToBottom();
     }, [messages, isOpen]);
 
-    const generateAIResponse = (input: string): string => {
-        const lowerInput = input.trim().toLowerCase();
-        
-        const knowledgeBase = [
-            {
-                pattern: /\b(?:hi|hello|hey|greetings|morning|afternoon|evening|wassup|ola)\b/i,
-                responses: [
-                    "Hello! I am SESA's intelligent assistant. Ready to learn something new today? 🚀",
-                    "Hi there! How can I assist you with your SESA learning journey today?",
-                    "Greetings! Let me know if you need help finding a course, understanding billing, or navigating the platform. 😊"
-                ]
-            },
-            {
-                pattern: /\b(?:enroll|pay|upgrade|buy|purchase|part 1|part 2|premium|price|cost|free|money|birr|bank|telebirr|payment)\b/i,
-                responses: [
-                    "To enroll in a course, start by watching the first part for free! Once you're ready, click 'Pay & Enroll' to unlock everything. 💳 We support Telebirr, CBE Birr, Awash Bank, Bank of Abyssinia, and Credit/Debit Cards. Just upload your receipt screenshot for verification!",
-                    "Our payment process is flexible! High school courses offer 2 free preview videos, while general tech courses offer 1. After the preview, pay via local Ethiopian banks (CBE, Awash, Telebirr) or Card. Upload your receipt on the payment page for admin approval. ✅"
-                ]
-            },
-            {
-                pattern: /\b(?:dashboard|progress|track|navigate|where|find|xp|level|chart|graph)\b/i,
-                responses: [
-                    "Your Dashboard is your personalized learning hub! 📊 It features dynamic charts tracking your average progress, XP points, and course completions. Navigate to 'Dashboard' from the sidebar to see everything. Is there a specific metric you want to find?",
-                    "We've made the dashboard highly visual! You can see your learning journey through interactive graphs and animations showing XP, enrolled courses, and your streak. 🔥"
-                ]
-            },
-            {
-                pattern: /\b(?:certificate|certificates?|diploma)\b/i,
-                responses: [
-                    "Certificates 🏆 are automatically generated when you complete a course. Just navigate to 'Certificates' in your student dashboard sidebar to download your PDF certificate! Make sure you've completed all lessons first.",
-                ]
-            },
-            {
-                pattern: /\b(?:teach|instructor|create|upload|publish|teacher|add course)\b/i,
-                responses: [
-                    "Instructors play a huge role here! 👨‍🏫 If you have instructor access, build structured courses by going to 'Create Course'. Add multiple lessons with YouTube video URLs. Our Admin team reviews your curriculum before it goes live! 🎬"
-                ]
-            },
-            {
-                pattern: /\b(?:grade 9|grade 10|grade 11|grade 12|high school|grade|class|category|categories)\b/i,
-                responses: [
-                    "SESA has dedicated sections for High School (Grades 9–12) and General Tech courses. 📘 Standard students default to Grade 9, Premium students access all grades! Use the dropdown in 'Browse Courses' to filter by your exact grade level."
-                ]
-            },
-            {
-                pattern: /\b(?:admin|approve|reject|feedback|comment|verify)\b/i,
-                responses: [
-                    "Our platform includes a robust Admin approval workflow. 🔒 Admins review student payment receipts and instructor course submissions. If something isn't right, Admins provide specific feedback so students and teachers know exactly what to fix!"
-                ]
-            },
-            {
-                pattern: /\b(?:video|youtube|embed|watch|play|locked|unlock|lesson)\b/i,
-                responses: [
-                    "Courses are structured lesson-by-lesson! 🎬 When you browse a course, you can smoothly transition between unlocked video lessons. Locked lessons clearly show an overlay — just complete your enrollment to instantly unlock all secure embedded videos!"
-                ]
-            },
-            {
-                pattern: /\b(?:error|bug|fail|not working|broken|help|support|contact|issue|crash|load)\b/i,
-                responses: [
-                    "I'm sorry you're running into issues! 😔 Sometimes 'Failed to load' errors happen if the server is restarting or your token expired. Try logging out and back in. If issues persist, reach out to support@sesa.academy with a screenshot!"
-                ]
-            },
-            {
-                pattern: /\b(?:learn|study|subject|math|science|physics|chemistry|biology|english|react|node|mern|programming|python|javascript)\b/i,
-                responses: [
-                    "SESA offers everything from core academics (Physics, Math, Biology) to advanced Tech stacks (MERN, React, Node.js, Python). 💻 Explore our catalog to find structured curriculums taught by expert Ethiopian instructors!"
-                ]
-            },
-            {
-                pattern: /\b(?:who are you|what are you|ai|bot|name|intelligent|smart)\b/i,
-                responses: [
-                    "I am the SESA AI Assistant! 🤖 I understand our entire platform ecosystem — from student enrollment and structured video lessons to instructor course creation and admin payment verification workflows. How can I intelligently assist you today?"
-                ]
-            },
-            {
-                pattern: /\b(?:streak|fire|daily|habit|consistent)\b/i,
-                responses: [
-                    "Your daily learning streak 🔥 is tracked on your dashboard! Log in and watch at least one lesson per day to keep your streak alive. The longer your streak, the more XP you earn! Consistency is the key to mastery. 💪"
-                ]
-            }
-        ];
-
-        for (const kb of knowledgeBase) {
-            if (kb.pattern.test(lowerInput)) {
-                return kb.responses[Math.floor(Math.random() * kb.responses.length)];
-            }
+    const generateAIResponse = async (input: string): Promise<string> => {
+        try {
+            const res = await apiService.ai.chat(input);
+            return res.data?.reply || 'Sorry, I could not generate a response right now. Please try again.';
+        } catch (error) {
+            console.error('AI chat error:', error);
+            return 'Sorry, I could not reach the AI assistant right now. Please try again later.';
         }
-
-        if (lowerInput.length > 30) {
-            return "That's a great detailed question! 🤔 While I analyze the specifics, SESA is designed with structured lessons, an admin approval workflow, and flexible payment options for both High School and Tech categories. Can you break it down into smaller parts — about courses, payments, or your dashboard?";
-        }
-
-        const fallbacks = [
-            "I'm continuously learning to be more intelligent! 💡 Could you provide a bit more context? Are you asking about the student experience, instructor course creation, or admin approvals?",
-            "That's an interesting question! I'm best equipped to help with the SESA platform — like enrolling via local Ethiopian banks, how our structured lesson curriculum works, or how to navigate your dynamic dashboard. 🎓",
-            "I might need a little more clarification. 😊 SESA offers a rich learning environment. Tell me if you need help finding categorized courses or understanding the free preview limits!"
-        ];
-        
-        return fallbacks[Math.floor(Math.random() * fallbacks.length)];
     };
 
-    const sendMessage = (text: string) => {
+    const sendMessage = async (text: string) => {
         if (!text.trim()) return;
 
         const userMsg: ChatMessage = {
@@ -151,21 +61,22 @@ const AIHelper: React.FC = () => {
             timestamp: new Date(),
         };
 
-        setMessages(prev => [...prev, userMsg]);
+        setMessages((prev) => [...prev, userMsg]);
         setInputValue('');
         setIsTyping(true);
         setShowQuickActions(false);
 
-        setTimeout(() => {
-            const aiMsg: ChatMessage = {
-                id: (Date.now() + 1).toString(),
-                text: generateAIResponse(userMsg.text),
-                sender: 'ai',
-                timestamp: new Date(),
-            };
-            setMessages(prev => [...prev, aiMsg]);
-            setIsTyping(false);
-        }, 900 + Math.random() * 700);
+        const replyText = await generateAIResponse(userMsg.text);
+
+        const aiMsg: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            text: replyText,
+            sender: 'ai',
+            timestamp: new Date(),
+        };
+
+        setMessages((prev) => [...prev, aiMsg]);
+        setIsTyping(false);
     };
 
     const handleSend = () => sendMessage(inputValue);

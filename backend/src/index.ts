@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
 import authRoutes from './routes/auth.js';
 import courseRoutes from './routes/courses.js';
 import courseManagementRoutes from './routes/courseManagement.js';
@@ -23,8 +24,16 @@ import searchRoutes from './routes/search.js';
 import assessmentRoutes from './routes/assessments.js';
 import forumRoutes from './routes/forum.js';
 import messageRoutes from './routes/messages.js';
+import evaluationRoutes from './routes/evaluations.js';
+import videoWorkflowRoutes from './routes/videoWorkflowRoutes.js';
+import aiRoutes from './routes/ai.js';
 import http from 'http';
 import { initSocket } from './utils/socket.js';
+import { fileURLToPath } from 'url';
+
+// __dirname replacement for ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -145,6 +154,12 @@ app.use('/api/search', searchRoutes);
 app.use('/api/assessments', assessmentRoutes);
 app.use('/api/forums', forumRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/evaluations', evaluationRoutes);
+app.use('/api/video-workflow', videoWorkflowRoutes);
+app.use('/api/ai', aiRoutes);
+
+// Static file serving for uploads
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.get('/', (_req, res) => {
     res.send('SESA Secure API with Real-time Notifications is running...');

@@ -4,6 +4,8 @@ export interface IEnrollment extends Document {
     user: mongoose.Types.ObjectId;
     course: mongoose.Types.ObjectId;
     status: 'pending' | 'approved' | 'rejected';
+    paymentMethod: 'bank_transfer' | 'cash' | 'chapa' | 'telebirr' | 'cbe_birr' | 'stripe' | 'paypal';
+    transactionId?: string;
     paymentProofUrl?: string;
     adminComment?: string;
     requestedAt: Date;
@@ -18,6 +20,12 @@ const EnrollmentSchema: Schema = new Schema({
         enum: ['pending', 'approved', 'rejected'],
         default: 'pending'
     },
+    paymentMethod: {
+        type: String,
+        enum: ['bank_transfer', 'cash', 'chapa', 'telebirr', 'cbe_birr', 'stripe', 'paypal'],
+        default: 'bank_transfer'
+    },
+    transactionId: { type: String },
     paymentProofUrl: { type: String },
     adminComment: { type: String },
     requestedAt: { type: Date, default: Date.now },

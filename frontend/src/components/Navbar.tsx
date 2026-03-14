@@ -150,7 +150,11 @@ const Navbar: React.FC = () => {
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="text-sm font-semibold text-dark-bg dark:text-light truncate group-hover:text-primary">{course.title}</div>
-                                                        <div className="text-[10px] text-gray-500">{course.category?.name} • {course.level}</div>
+                                                        <div className="text-[10px] text-gray-500 flex items-center gap-2">
+                                                            <span className="px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 font-bold">{course.gradeLevel || 'General'}</span>
+                                                            {course.category?.name && <span>• {course.category.name}</span>}
+                                                            <span>• {course.level || 'Beginner'}</span>
+                                                        </div>
                                                     </div>
                                                 </Link>
                                             ))}

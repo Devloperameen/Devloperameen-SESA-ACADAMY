@@ -17,6 +17,7 @@ router.get('/', optionalAuthenticate, async (req: AuthRequest, res: Response) =>
             q,
             category,
             level,
+            gradeLevel,
             minPrice,
             maxPrice,
             page: pageStr = '1',
@@ -45,8 +46,16 @@ router.get('/', optionalAuthenticate, async (req: AuthRequest, res: Response) =>
         }
 
         if (category) filter.category = category;
+        if (gradeLevel) filter.gradeLevel = gradeLevel;
         if (level && ['beginner', 'intermediate', 'advanced'].includes(level)) {
             filter.level = level;
+        }
+
+        // Search within lessons/resources if query is present
+        if (q && q.trim().length > 0) {
+             const safeQ = q.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+             filter.$or.push({ 'lessons.title': { $regex: safeQ, $options: 'i' } });
+             filter.$or.push({ 'lessons.resources.title': { $regex: safeQ, $options: 'i' } });
         }
 
         // Price range filter

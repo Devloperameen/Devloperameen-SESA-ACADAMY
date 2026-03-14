@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Link, useSearchParams } from 'react-router-dom';
-import { CreditCard, Lock, CheckCircle, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { 
+    CreditCard, Lock, CheckCircle, ArrowLeft, Smartphone, Building2, 
+    ShieldCheck, Zap, Info, Upload, AlertCircle, Sparkles, Receipt
+} from 'lucide-react';
 import axios from 'axios';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -9,30 +12,54 @@ import { showError, showSuccess } from '../utils/toast';
 
 const Payment: React.FC = () => {
     const { t } = useLanguage();
-    const [step, setStep] = useState<'form' | 'success'>('form');
+    const navigate = useNavigate();
+    const [step, setStep] = useState<'selection' | 'details' | 'success'>('selection');
     const [loading, setLoading] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState<'card' | 'ethio_banks'>('ethio_banks');
-    const [ethioBank, setEthioBank] = useState<'telebirr' | 'cbe_birr' | 'awash' | 'boa'>('telebirr');
+    const [provider, setProvider] = useState<'chapa' | 'telebirr' | 'cbe_birr' | 'bank_transfer' | 'stripe'>('chapa');
     const [file, setFile] = useState<File | null>(null);
+    const [transactionId, setTransactionId] = useState('');
+    const [course, setCourse] = useState<any>(null);
 
     const { token } = useAuth();
     const [searchParams] = useSearchParams();
     const courseId = searchParams.get('courseId');
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
+    useEffect(() => {
+        if (!courseId) {
+            navigate('/student/browse');
+            return;
+        }
+
+        const fetchCourse = async () => {
+            try {
+                const res = await axios.get(`${API_URL}/courses/${courseId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setCourse(res.data);
+            } catch (err) {
+                showError('Failed to load course details');
+            }
+        };
+
+        if (token) fetchCourse();
+    }, [courseId, token, API_URL, navigate]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
-        // Prepare payload
-        const payload: any = { watchedPart1: true };
-        // If a screenshot file is selected, convert to base64
-        if (paymentMethod === 'ethio_banks' && file) {
+        const payload: any = { 
+            watchedPart1: true,
+            paymentMethod: provider,
+            transactionId: transactionId
+        };
+
+        if ((provider === 'bank_transfer' || provider === 'telebirr' || provider === 'cbe_birr') && file) {
             const reader = new FileReader();
             const base64Promise = new Promise<string>((resolve, reject) => {
                 reader.onload = () => {
                     const result = reader.result as string;
-                    // Remove data URL prefix if present
                     const base64 = result.split(',')[1] || result;
                     resolve(base64);
                 };
@@ -40,8 +67,7 @@ const Payment: React.FC = () => {
             });
             reader.readAsDataURL(file);
             try {
-                const base64 = await base64Promise;
-                payload.paymentProofUrl = base64;
+                payload.paymentProofUrl = await base64Promise;
             } catch (err) {
                 showError('Failed to read screenshot file');
                 setLoading(false);
@@ -49,194 +75,219 @@ const Payment: React.FC = () => {
             }
         }
 
-        setTimeout(async () => {
-            if (courseId && token) {
-                try {
-                    await axios.post(
-                        `${API_URL}/enrollments/request/${courseId}`,
-                        payload,
-                        { headers: { Authorization: `Bearer ${token}` } }
-                    );
-                    showSuccess('Payment successful! Enrollment pending admin approval.');
-                } catch (error: any) {
-                    showError(error?.response?.data?.message || 'Failed to submit enrollment request');
-                }
-            }
-            setLoading(false);
+        try {
+            await axios.post(
+                `${API_URL}/enrollments/request/${courseId}`,
+                payload,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            showSuccess('Request submitted! Enrollment pending admin verification.');
             setStep('success');
-        }, 1500);
+        } catch (error: any) {
+            showError(error?.response?.data?.message || 'Failed to submit enrollment request');
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (step === 'success') {
         return (
-            <div className="p-4 md:p-8">
-                <div className="max-w-md mx-auto text-center py-12 bg-white dark:bg-dark-card rounded-2xl border border-gray-100 dark:border-gray-800 shadow-premium">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
+            <div className="min-h-[80vh] flex items-center justify-center p-4">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="max-w-md w-full text-center p-10 bg-white dark:bg-dark-card rounded-[2.5rem] shadow-premium border border-emerald-100 dark:border-emerald-900/30"
+                >
+                    <div className="w-20 h-20 bg-emerald-500/20 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-8">
+                        <CheckCircle className="h-10 w-10" />
+                    </div>
+                    <h2 className="text-3xl font-black text-dark-bg dark:text-white mb-4">{t('Request Received!', 'ጥያቄው ደርሷል!')}</h2>
+                    <p className="text-gray-500 dark:text-gray-400 mb-10 leading-relaxed font-medium">
+                        {t('Your payment details have been submitted for verification. An admin will review and unlock your course shortly.', 'የክፍያ ዝርዝሮችዎ ለማረጋገጫ ቀርበዋል። የአስተዳዳሪው ካረጋገጡ በኋላ ኮርሱ ይከፈታል።')}
+                    </p>
+                    <Link
+                        to="/dashboard"
+                        className="flex items-center justify-center gap-3 w-full py-4 rounded-2xl bg-dark-bg dark:bg-white text-white dark:text-dark-bg font-black hover:scale-105 transition-all shadow-xl"
                     >
-                        <div className="inline-flex p-4 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 mb-6">
-                            <CheckCircle className="h-12 w-12" />
-                        </div>
-                        <h2 className="text-xl font-bold text-dark-bg dark:text-white mb-2">Payment received</h2>
-                        <p className="text-gray-500 dark:text-gray-400 mb-8">Your enrollment will be activated after admin approval.</p>
-                        <Link
-                            to="/dashboard"
-                            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-bold hover:bg-secondary transition-colors"
-                        >
-                            Go to Dashboard
-                            <ArrowLeft className="h-4 w-4 rotate-180" />
-                        </Link>
-                    </motion.div>
-                </div>
+                        {t('Go to Dashboard', 'ወደ ዳሽቦርድ ሂድ')}
+                        <ArrowLeft className="h-4 w-4 rotate-180" />
+                    </Link>
+                </motion.div>
             </div>
         );
     }
 
     return (
-        <div className="p-4 md:p-8">
-            <div className="max-w-xl mx-auto mb-8 text-center">
-                <h1 className="text-3xl font-bold text-dark-bg dark:text-white mb-2">{t('checkout')}</h1>
-                <p className="text-gray-500 dark:text-gray-400">Secure payment for course enrollments. Complete to unlock remaining parts.</p>
-            </div>
-
-            <motion.form
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                onSubmit={handleSubmit}
-                className="max-w-lg mx-auto"
-            >
-                <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-dark-card p-6 shadow-premium">
-                    <div className="flex items-center gap-2 mb-6">
-                        <Lock className="h-5 w-5 text-emerald-500" />
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Secure AES-256 Encrypted Payment</span>
+        <div className="py-12 px-4 max-w-6xl mx-auto">
+            <div className="flex flex-col lg:flex-row gap-12">
+                {/* Left: Summary */}
+                <div className="lg:w-1/2 space-y-8">
+                    <div>
+                        <Link to={`/student/course-view/${courseId}`} className="inline-flex items-center gap-2 text-primary font-bold text-sm mb-6 hover:gap-3 transition-all">
+                            <ArrowLeft className="w-4 h-4" /> {t('Back to Course', 'ወደ ኮርሱ ተመለስ')}
+                        </Link>
+                        <h1 className="text-4xl font-black text-dark-bg dark:text-white mb-4">{t('Finalize Enrollment', 'ምዝገባውን ያጠናቅቁ')}</h1>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium">{t('You are one step away from unlocking premium lessons, quizzes, and certificates.', 'ፕሪሚየም ትምህርቶችን፣ ፈተናዎችን እና ሰርተፍኬቶችን ለመክፈት አንድ እርምጃ ቀርቶታል።')}</p>
                     </div>
 
-                    <div className="flex gap-2 mb-6 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                        <button
-                            type="button"
-                            onClick={() => setPaymentMethod('ethio_banks')}
-                            className={`flex-1 py-2 text-sm font-semibold rounded-md transition-colors ${paymentMethod === 'ethio_banks' ? 'bg-white dark:bg-dark-bg text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
+                    {course && (
+                        <motion.div 
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="p-8 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-[2rem] border border-primary/10 relative overflow-hidden group"
                         >
-                            Ethiopian Banks
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setPaymentMethod('card')}
-                            className={`flex-1 py-2 text-sm font-semibold rounded-md transition-colors ${paymentMethod === 'card' ? 'bg-white dark:bg-dark-bg text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
-                        >
-                            Credit Card
-                        </button>
-                    </div>
-
-                    {paymentMethod === 'card' ? (
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-dark-bg dark:text-white mb-2">Card number</label>
-                                <input
-                                    type="text"
-                                    placeholder="4242 4242 4242 4242"
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-bg text-dark-bg dark:text-white placeholder:text-gray-400 focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-                                />
+                            <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:rotate-12 transition-transform">
+                                <Sparkles className="w-24 h-24" />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-dark-bg dark:text-white mb-2">Expiry</label>
-                                    <input
-                                        type="text"
-                                        placeholder="MM/YY"
-                                        className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-bg text-dark-bg dark:text-white transition-colors"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-dark-bg dark:text-white mb-2">CVC</label>
-                                    <input
-                                        type="text"
-                                        placeholder="123"
-                                        className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-bg text-dark-bg dark:text-white transition-colors"
-                                    />
+                            <div className="relative z-10">
+                                <span className="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full mb-4 inline-block">Selected course</span>
+                                <h3 className="text-2xl font-black text-dark-bg dark:text-white mb-2">{course.title}</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 line-clamp-2">{course.description}</p>
+                                
+                                <div className="flex items-center justify-between pt-6 border-t border-primary/10">
+                                    <span className="text-gray-400 font-bold uppercase text-[10px]">{t('Total Amount', 'ጠቅላላ ክፍያ')}</span>
+                                    <div className="text-right">
+                                        <div className="text-3xl font-black text-primary">ETB {course.price?.toLocaleString()}</div>
+                                        <p className="text-[10px] text-gray-400 font-bold">{t('One-time payment for full access', 'ለሙሉ አገልግሎት የአንድ ጊዜ ክፍያ')}</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-dark-bg dark:text-white mb-2">Name on card</label>
-                                <input
-                                    type="text"
-                                    placeholder="Full name"
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-bg text-dark-bg dark:text-white transition-colors"
-                                />
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="space-y-4">
-                            <label className="block text-sm font-medium text-dark-bg dark:text-white mb-2">Select Bank / Mobile Money</label>
-                            <div className="grid grid-cols-2 gap-3 mb-4">
-                                {[
-                                    { id: 'telebirr', name: 'Telebirr', color: 'border-blue-400' },
-                                    { id: 'cbe_birr', name: 'CBE Birr', color: 'border-purple-400' },
-                                    { id: 'awash', name: 'Awash Bank', color: 'border-rose-400' },
-                                    { id: 'boa', name: 'Bank of Abyssinia', color: 'border-yellow-400' }
-                                ].map((bank) => (
-                                    <button
-                                        key={bank.id}
-                                        type="button"
-                                        onClick={() => setEthioBank(bank.id as any)}
-                                        className={`p-3 text-sm font-semibold rounded-xl border-2 transition-all flex items-center justify-center ${ethioBank === bank.id ? `${bank.color} bg-gray-50 dark:bg-gray-800 text-dark-bg dark:text-white shadow-sm` : 'border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600'}`}
-                                    >
-                                        {bank.name}
-                                    </button>
-                                ))}
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-dark-bg dark:text-white mb-2">Phone Number / Account ID</label>
-                                <input
-                                    type="text"
-                                    placeholder="+251 9..."
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-bg text-dark-bg dark:text-white placeholder:text-gray-400 focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-dark-bg dark:text-white mb-2">Upload Transfer Screenshot (Required)</label>
-<input
-    type="file"
-    accept="image/*"
-    onChange={(e) => {
-        const selected = e.target.files?.[0] || null;
-        setFile(selected);
-    }}
-    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-bg text-dark-bg dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-colors cursor-pointer"
-/>
-                            </div>
-                            <div className="p-3 mt-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 text-sm text-emerald-800 dark:text-emerald-300">
-                                Send the amount to the official accounts. Once you've completed the transfer, attach the receipt.
-                            </div>
-                        </div>
+                        </motion.div>
                     )}
 
-                    <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">{t('total')}</span>
-                        <span className="text-xl font-bold text-dark-bg dark:text-white">ETB 1,499.00</span>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="p-4 bg-gray-50 dark:bg-dark-card rounded-2xl border border-gray-100 dark:border-gray-800">
+                            <ShieldCheck className="w-6 h-6 text-emerald-500 mb-2" />
+                            <h4 className="font-bold text-sm text-dark-bg dark:text-white">{t('Secure Checkout', 'ደህንነቱ የተጠበቀ')}</h4>
+                            <p className="text-[10px] text-gray-400">{t('Encrypted data & safe transactions', 'የተመሰጠረ መረጃ እና ደህንነቱ የተጠበቀ ግብይት')}</p>
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-dark-card rounded-2xl border border-gray-100 dark:border-gray-800">
+                            <Zap className="w-6 h-6 text-amber-500 mb-2" />
+                            <h4 className="font-bold text-sm text-dark-bg dark:text-white">{t('Instant Activation', 'ፈጣን አገልግሎት')}</h4>
+                            <p className="text-[10px] text-gray-400">{t('Auto-unlock via Chapa/Telebirr', 'በቻፓ/ቴሌብር በራስ-ሰር ይከፈታል')}</p>
+                        </div>
                     </div>
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="mt-6 w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gradient-to-r from-primary to-accent text-white font-bold hover:shadow-lg transition-all disabled:opacity-70 disabled:cursor-not-allowed hover:scale-105 disabled:hover:scale-100"
-                    >
-                        {loading ? (
-                            <span className="h-5 w-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                        ) : (
-                            <>
-                                <CreditCard className="h-5 w-5" />
-                                {t('payNow')}
-                            </>
-                        )}
-                    </button>
                 </div>
-                <p className="mt-6 text-center text-sm text-gray-500">
-                    <Link to="/student/browse" className="text-primary hover:text-accent hover:underline flex items-center justify-center gap-1 transition-colors">
-                        <ArrowLeft className="h-4 w-4" /> Return to Course Library
-                    </Link>
-                </p>
-            </motion.form>
+
+                {/* Right: Payment Method */}
+                <div className="lg:w-1/2">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-white dark:bg-dark-card rounded-[2.5rem] shadow-premium border border-gray-100 dark:border-gray-800 p-8 md:p-10"
+                    >
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+                                <CreditCard className="w-5 h-5" />
+                            </div>
+                            <h2 className="text-xl font-bold text-dark-bg dark:text-white">{t('Payment Method', 'የክፍያ ዘዴ')}</h2>
+                        </div>
+
+                        <div className="grid sm:grid-cols-2 gap-4 mb-8">
+                            {[
+                                { id: 'chapa', name: 'Chapa', desc: 'Auto-unlock', icon: Zap, color: 'hover:border-blue-400' },
+                                { id: 'telebirr', name: 'Telebirr', desc: 'Mobile App', icon: Smartphone, color: 'hover:border-emerald-400' },
+                                { id: 'cbe_birr', name: 'CBE Birr', desc: 'Online/Manual', icon: Building2, color: 'hover:border-purple-400' },
+                                { id: 'bank_transfer', name: 'Offline Transfer', desc: 'Receipt required', icon: Receipt, color: 'hover:border-amber-400' },
+                            ].map((m) => (
+                                <button
+                                    key={m.id}
+                                    type="button"
+                                    onClick={() => {
+                                        setProvider(m.id as any);
+                                        setStep('details');
+                                    }}
+                                    className={`p-5 rounded-[1.5rem] border-2 text-left transition-all ${
+                                        provider === m.id 
+                                            ? 'border-primary bg-primary/5 shadow-lg shadow-primary/5' 
+                                            : `border-gray-100 dark:border-gray-800 ${m.color} hover:shadow-md`
+                                    }`}
+                                >
+                                    <m.icon className={`w-6 h-6 mb-3 ${provider === m.id ? 'text-primary' : 'text-gray-400'}`} />
+                                    <h4 className="font-bold text-sm text-dark-bg dark:text-white">{m.name}</h4>
+                                    <p className="text-[10px] text-gray-400 font-medium uppercase tracking-tight">{m.desc}</p>
+                                </button>
+                            ))}
+                        </div>
+
+                        <AnimatePresence mode="wait">
+                            <motion.form
+                                key={provider}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                onSubmit={handleSubmit}
+                                className="space-y-6"
+                            >
+                                {provider === 'chapa' ? (
+                                    <div className="p-6 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-800 flex items-start gap-4">
+                                        <Info className="w-5 h-5 text-blue-500 mt-1 flex-shrink-0" />
+                                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                                            {t('You will be redirected to Chapa secure checkout. Supports Telebirr, CBE Birr, and International Cards.', 'ወደ ቻፓ የክፍያ ገፅ ይወሰዳሉ። ቴሌብር፣ ሲቢኢ ብር እና ዓለም አቀፍ ካርዶችን ይደግፋል።')}
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">{t('Transaction ID / Ref', 'የግብይት መለያ')}</label>
+                                            <input 
+                                                required
+                                                value={transactionId}
+                                                onChange={(e) => setTransactionId(e.target.value)}
+                                                placeholder="e.g. TX-4927103"
+                                                className="w-full px-5 py-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-dark-bg text-dark-bg dark:text-white placeholder:text-gray-400 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">{t('Upload Receipt', 'ደረሰኝ ይላኩ')}</label>
+                                            <div className="relative group">
+                                                <input 
+                                                    type="file"
+                                                    onChange={(e) => setFile(e.target.files?.[0] || null)}
+                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                />
+                                                <div className="px-5 py-8 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-dark-bg/50 flex flex-col items-center justify-center text-center group-hover:border-primary transition-all">
+                                                    <Upload className="w-8 h-8 text-gray-300 mb-2 group-hover:text-primary transition-colors" />
+                                                    <p className="text-xs font-bold text-gray-500">{file ? file.name : t('Tap to upload screenshot', 'ፎቶ ለማስገባት ይጫኑ')}</p>
+                                                    <p className="text-[10px] text-gray-400 mt-1">{t('JPG, PNG (Max 5MB)', 'JPG፣ PNG (ቢበዛ 5 ሜጋ ባይት)')}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="p-4 bg-amber-500/5 rounded-2xl border border-amber-500/10 flex items-start gap-4">
+                                    <AlertCircle className="w-5 h-5 text-amber-500 mt-1 flex-shrink-0" />
+                                    <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed font-medium">
+                                        {t('Requests are processed within 2-6 hours. Ensure you provide valid proof to avoid rejection.', 'ጥያቄዎች ከ2-6 ሰዓታት ውስጥ ምላሽ ያገኛሉ። ውድቅ እንዳይሆን ትክክለኛ መረጃ ይላኩ።')}
+                                    </p>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={loading || !course}
+                                    className="w-full py-5 rounded-[1.5rem] bg-gradient-to-r from-primary to-secondary text-white font-black hover:shadow-2xl hover:shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:grayscale disabled:hover:scale-100"
+                                >
+                                    {loading ? (
+                                        <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin" />
+                                    ) : (
+                                        <>
+                                            <ShieldCheck className="w-5 h-5" />
+                                            {provider === 'chapa' ? t('Proceed to Checkout', 'ክፍያውን ይጀምሩ') : t('Submit Verification', 'ለማረጋገጥ ይላኩ')}
+                                        </>
+                                    )}
+                                </button>
+                            </motion.form>
+                        </AnimatePresence>
+
+                        <div className="mt-8 flex items-center justify-center gap-6 grayscale opacity-30">
+                            <img src="/chapa-logo.png" alt="Chapa" className="h-5" />
+                            <img src="/telebirr-logo.png" alt="Telebirr" className="h-4" />
+                            <img src="/visa-mastercard.png" alt="Visa Mastercard" className="h-4" />
+                        </div>
+                    </motion.div>
+                </div>
+            </div>
         </div>
     );
 };

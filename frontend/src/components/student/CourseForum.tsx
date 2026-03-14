@@ -85,10 +85,10 @@ const CourseForum: React.FC<CourseForumProps> = ({ courseId, currentUserId }) =>
                 content: newPostContent
             });
             
-            // Re-fetch threads to get latest posts (or update local state)
+            // The backend returns the completely updated thread object
             const updatedThreads = threads.map(t => {
                 if (t._id === threadId) {
-                    return { ...t, posts: [...t.posts, res.data] };
+                    return res.data;
                 }
                 return t;
             });

@@ -52,6 +52,7 @@ interface CoursePreview {
     };
     quizzes?: any[];
     assignments?: any[];
+    category?: any;
 }
 
 interface MyEnrollmentCourse {
@@ -63,10 +64,17 @@ interface MyEnrollmentCourse {
     youtubeVideoId?: string;
 }
 
+interface Category {
+    _id: string;
+    name: string;
+    icon: string;
+}
+
 interface LibraryCourse extends CoursePreview {
     hasFullAccess: boolean;
     enrollmentStatus: 'pending' | 'approved' | 'rejected' | 'unknown';
     freeVideosLimit: number;
+    category?: Category;
 }
 
 
@@ -130,6 +138,8 @@ const BrowseCourses: React.FC = () => {
         user?.role === UserRole.ADMIN || user?.role === UserRole.SUPER_ADMIN || user?.role === UserRole.INSTRUCTOR;
     const canViewDiscussion = Boolean(user && (isModerator || selectedCourse?.hasFullAccess));
 
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<string>('All Subjects');
     const [selectedGrade, setSelectedGrade] = useState<string>('All Grades');
 
     useEffect(() => {
@@ -140,16 +150,35 @@ const BrowseCourses: React.FC = () => {
         }
     }, [user, isModerator]);
 
+    const fetchCategories = async () => {
+        try {
+            const resp = await axios.get(`${API_URL}/categories`);
+            setCategories(resp.data || []);
+        } catch (err) {
+            console.error('Failed to fetch categories', err);
+        }
+    };
+
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
     const filteredCourses = useMemo(() => {
         return courses.filter((c) => {
             const matchesGrade = selectedGrade === 'All Grades' || c.gradeLevel === selectedGrade;
+            
+            const matchesSubject = selectedCategory === 'All Subjects' || 
+                (typeof c.category === 'object' && c.category?._id === selectedCategory) ||
+                (typeof c.category === 'string' && c.category === selectedCategory);
+
             const matchesSearch = !searchQuery || 
                 c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 c.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 c.instructor?.name.toLowerCase().includes(searchQuery.toLowerCase());
-            return matchesGrade && matchesSearch;
+            
+            return matchesGrade && matchesSubject && matchesSearch;
         });
-    }, [courses, selectedGrade, searchQuery]);
+    }, [courses, selectedGrade, selectedCategory, searchQuery]);
 
     const fetchLibrary = async (): Promise<void> => {
         try {
@@ -185,7 +214,8 @@ const BrowseCourses: React.FC = () => {
                     gradeLevel: course.gradeLevel || 'General',
                     hasFullAccess: enrollmentStatus === 'approved',
                     enrollmentStatus,
-                    freeVideosLimit
+                    freeVideosLimit,
+                    category: course.category as any
                 } as LibraryCourse;
             });
 
@@ -291,30 +321,50 @@ const BrowseCourses: React.FC = () => {
                         Back to Dashboard
                     </button>
 
-                    <div className="rounded-2xl border border-slate-700 bg-[#112240] p-5">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
-                                <h1 className="text-2xl font-bold text-white">Student Course Library</h1>
-                                <p className="text-sm text-slate-300">
-                                    Full access unlocks after approval. Start with Parts 1 & 2 free preview and request enrollment.
+                    <div className="rounded-2xl border border-slate-700 bg-[#112240] p-6 shadow-xl">
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                            <div className="flex-1">
+                                <h1 className="text-3xl font-black text-white italic tracking-tight">Explore the <span className="text-blue-400">Knowledge Base</span></h1>
+                                <p className="text-sm text-slate-400 mt-1 font-medium">
+                                    Access expert-led courses across grades 8-12. Watch free previews before enrolling.
                                 </p>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <label className="text-sm font-medium text-slate-300">Grade Level:</label>
-                                <select
-                                    value={selectedGrade}
-                                    onChange={(e) => setSelectedGrade(e.target.value)}
-                                    className="rounded-xl border border-slate-700 bg-slate-900/60 px-3 py-2 text-sm text-slate-200 outline-none focus:border-blue-500 transition-colors"
-                                >
-                                    {(isModerator || user?.role === UserRole.PREMIUM_STUDENT || user?.role === UserRole.ADMIN) && (
-                                        <option value="All Grades">All Grades</option>
-                                    )}
-                                    <option value="General">General / Open</option>
-                                    <option value="Grade 9">Grade 9</option>
-                                    <option value="Grade 10">Grade 10</option>
-                                    <option value="Grade 11">Grade 11</option>
-                                    <option value="Grade 12">Grade 12</option>
-                                </select>
+                            
+                            <div className="flex flex-wrap items-center gap-4">
+                                <div className="space-y-1.5 min-w-[140px]">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Grade Level</label>
+                                    <select
+                                        value={selectedGrade}
+                                        onChange={(e) => setSelectedGrade(e.target.value)}
+                                        className="w-full rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-2.5 text-sm font-bold text-slate-200 outline-none focus:border-blue-500 transition-all hover:bg-slate-800"
+                                    >
+                                        {(isModerator || user?.role === UserRole.PREMIUM_STUDENT || user?.role === UserRole.ADMIN) && (
+                                            <option value="All Grades">All Grades</option>
+                                        )}
+                                        <option value="General">General</option>
+                                        <option value="Grade 8">Grade 8</option>
+                                        <option value="Grade 9">Grade 9</option>
+                                        <option value="Grade 10">Grade 10</option>
+                                        <option value="Grade 11">Grade 11</option>
+                                        <option value="Grade 12">Grade 12</option>
+                                    </select>
+                                </div>
+
+                                <div className="space-y-1.5 min-w-[200px]">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Subject / Category</label>
+                                    <select
+                                        value={selectedCategory}
+                                        onChange={(e) => setSelectedCategory(e.target.value)}
+                                        className="w-full rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-2.5 text-sm font-bold text-slate-200 outline-none focus:border-blue-500 transition-all hover:bg-slate-800"
+                                    >
+                                        <option value="All Subjects">All Subjects</option>
+                                        {categories.map(cat => (
+                                            <option key={cat._id} value={cat._id}>
+                                                {cat.icon} {cat.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -561,6 +611,11 @@ const BrowseCourses: React.FC = () => {
                                                             
                                                             {(!selectedCourse.lessons?.[selectedLessonIndex]?.resources || selectedCourse.lessons[selectedLessonIndex].resources.length === 0) ? (
                                                                 <p className="text-center py-4 text-slate-500 text-xs italic">No specific resources for this lesson.</p>
+                                                            ) : !(selectedCourse.hasFullAccess || selectedLessonIndex < selectedCourse.freeVideosLimit) ? (
+                                                                <div className="p-8 text-center bg-slate-800/20 rounded-xl border border-dashed border-slate-700">
+                                                                    <Lock className="h-8 w-8 text-slate-500 mx-auto mb-2 opacity-50" />
+                                                                    <p className="text-xs text-slate-400">Resources are locked for this lesson. Enroll to gain full access.</p>
+                                                                </div>
                                                             ) : (
                                                                 <div className="grid gap-2">
                                                                     {selectedCourse.lessons[selectedLessonIndex].resources.map((res: any, idx: number) => (

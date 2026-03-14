@@ -4,8 +4,8 @@ import { createThread, getCourseThreads, addPost } from '../controllers/forumCon
 
 const router = express.Router();
 
-router.post('/thread', authenticate, createThread);
+router.post('/threads', authenticate, createThread);
 router.get('/course/:courseId', authenticate, getCourseThreads);
-router.post('/thread/:threadId/post', authenticate, addPost);
+router.post('/threads/:threadId/posts', authenticate, addPost);
 
 export default router;

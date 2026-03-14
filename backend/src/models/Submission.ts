@@ -3,7 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface ISubmission extends Document {
     user: mongoose.Types.ObjectId;
     course: mongoose.Types.ObjectId;
-    assessmentType: 'quiz' | 'assignment';
+    assessmentType: 'quiz' | 'assignment' | 'midterm' | 'final';
     quizId?: mongoose.Types.ObjectId;
     assignmentId?: mongoose.Types.ObjectId;
     answers?: any[]; // For quizzes
@@ -20,7 +20,7 @@ export interface ISubmission extends Document {
 const SubmissionSchema: Schema = new Schema({
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     course: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
-    assessmentType: { type: String, enum: ['quiz', 'assignment'], required: true },
+    assessmentType: { type: String, enum: ['quiz', 'assignment', 'midterm', 'final'], required: true },
     quizId: { type: Schema.Types.ObjectId, ref: 'Quiz' },
     assignmentId: { type: Schema.Types.ObjectId, ref: 'Assignment' },
     answers: [{ type: Schema.Types.Mixed }],

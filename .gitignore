@@ -147,9 +147,3 @@ public/
 
 # Stores VSCode versions used for testing
 .vscode-test
-
-# Miscellaneous
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
