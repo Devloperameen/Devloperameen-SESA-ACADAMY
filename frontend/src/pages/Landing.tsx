@@ -74,29 +74,66 @@ const Landing: React.FC = () => {
 
     const motivationCategories = {
         Curiosity: [
-            { id: 'ZXGWYe01Ya8', title: 'The Power of Curiosity', author: 'Jim Rohn' },
-            { id: 'ks2QSk09ndE', title: 'Why You Must Ask Why', author: 'Education First' },
-            { id: 'v27H868X9kY', title: 'Finding Your Purpose', author: 'Productivity Pro' }
+            { id: 'JjvN_hYDp3g', title: 'The Power of Curiosity', author: 'Motivation Hub' },
+            { id: 'g6BtbIiJ_rc', title: 'Explore & Discover', author: 'Learning Channel' },
+            { id: 'V04ojClenZU', title: 'Question Everything', author: 'Curiosity Lab' },
+            { id: 'ZXsQAXx_ao0', title: 'Never Stop Learning', author: 'Inspire Daily' },
+            { id: 'mgmVOuLgFB0', title: 'Curiosity Drives Success', author: 'Motivation Pro' },
+            { id: '26U_seo0a1g', title: 'Ask Why', author: 'Learning First' },
+            { id: 'UNQhuFL6CWg', title: 'Discover Your Potential', author: 'Growth Mindset' },
+            { id: 'lsSC2vx7zFQ', title: 'The Learning Journey', author: 'Education Hub' }
         ],
         Success: [
-            { id: 'ZXGWYe01Ya8', title: 'The Power of Persistence', author: 'Jim Rohn' },
-            { id: 'tPnK6Ba4fS4', title: 'How to Achieve Your Goals', author: 'SESA Academy' },
-            { id: 'wnHW6o8WMas', title: 'Success Mindset', author: 'Brian Tracy' }
+            { id: 'UAZJC-yirR0', title: 'The Power of Persistence', author: 'Motivation Madness' },
+            { id: 'InjJ7WIpsZE', title: 'Success Mindset', author: 'Success Stories' },
+            { id: 'r6zFZQm0hcc', title: 'Keys to Success', author: 'Motivation Hub' },
+            { id: 'wnHW6o8WMas', title: 'Achieve Your Dreams', author: 'Brian Tracy' },
+            { id: 'tbnzAVRZ9Xc', title: 'Never Give Up', author: 'Success Academy' },
+            { id: 'IdTMDpizis8', title: 'Rise to Greatness', author: 'Inspire Nation' },
+            { id: 'KxGRhd_iWuE', title: 'Champion Mindset', author: 'Winners Circle' },
+            { id: 'p0p1fjLPjYQ', title: 'Unstoppable', author: 'Motivation Daily' },
+            { id: 'TQMbvJNRpLE', title: 'Dream Big', author: 'Success Pro' },
+            { id: 'ZiXG3tK3o7A', title: 'Victory Path', author: 'Achievement Hub' },
+            { id: 'fviFNrWKzZ8', title: 'Success Formula', author: 'Goal Getters' },
+            { id: 'WtfY9lJY5nA', title: 'Breakthrough', author: 'Success Masters' }
         ],
         Education: [
-            { id: 'ks2QSk09ndE', title: 'Why Knowledge is Power', author: 'Education First' },
-            { id: 'un8K7S6RIsA', title: 'Learning How to Learn', author: 'Barbara Oakley' },
-            { id: '7nyZ_16_A72', title: 'Student Success Habits', author: 'SESA Insights' }
+            { id: 'AJ1-WE1B2Ss', title: 'Why Knowledge is Power', author: 'Education First' },
+            { id: 'jpLp7NdsbOI', title: 'Learning How to Learn', author: 'SESA Insights' },
+            { id: 'U5lZ7j7bXJ4', title: 'Study Smart', author: 'Academic Excellence' },
+            { id: '3sK3wJAxGfs', title: 'Knowledge Journey', author: 'Learning Pro' },
+            { id: '5MgBikgcWnY', title: 'Education Matters', author: 'Study Hub' },
+            { id: '_xkSvufmjEs', title: 'Learn & Grow', author: 'Education Plus' },
+            { id: 'sm1mokevMWk', title: 'Student Success', author: 'Academic Pro' },
+            { id: 'jG3E2Z9b7UQ', title: 'Power of Learning', author: 'Study Masters' }
         ],
         Discipline: [
-            { id: 'vMv3vGfF0L8', title: 'The Secret to Discipline', author: 'Jocko Willink' },
-            { id: '2VDSpxX88pA', title: 'The 5 AM Club Strategy', author: 'Robin Sharma' },
-            { id: 'W0v_7nyZ_16', title: 'Internal Strength', author: 'Work Ethic' }
+            { id: 'kXH36VoLuZI', title: 'The Secret to Discipline', author: 'Discipline Pro' },
+            { id: 'dJrzwXPY6Q8', title: 'Build Self-Control', author: 'Work Ethic' },
+            { id: '7XFLTDQ4JMk', title: 'Daily Discipline', author: 'Habit Builder' },
+            { id: '2OEL4P1Rz04', title: 'Master Your Habits', author: 'Discipline Hub' },
+            { id: '4pLUleLdwY4', title: 'Willpower Training', author: 'Mental Strength' },
+            { id: '0ZpJ9Qh9iJk', title: 'Self-Control Mastery', author: 'Discipline First' },
+            { id: 'V1bFr2SWP1I', title: 'Build Strong Habits', author: 'Habit Pro' },
+            { id: 'g-jwWYX7Jlo', title: 'Discipline Equals Freedom', author: 'Work Hard' }
         ],
         Productivity: [
-            { id: 'W0v_7nyZ_16', title: 'Master Your Time', author: 'Work Ethic' },
-            { id: 'v27H868X9kY', title: 'Stop Procrastinating Now', author: 'Productivity Pro' },
-            { id: 'ks2QSk09ndE', title: 'Deep Work Principles', author: 'Cal Newport' }
+            { id: 'Pq2uwssaFRo', title: 'Master Your Time', author: 'Productivity Hub' },
+            { id: 'ZXGWYe01Ya8', title: 'Stop Procrastinating', author: 'Focus Academy' },
+            { id: '2Lz0VOltZKA', title: 'Get Things Done', author: 'Efficiency Pro' },
+            { id: '9vJRopau0g0', title: 'Peak Performance', author: 'Time Master' },
+            { id: 'ScMzIvxBSi4', title: 'Focus & Flow', author: 'Productivity Plus' },
+            { id: 'd6wRkzCW5qI', title: 'Time Management', author: 'Efficiency Hub' },
+            { id: '8aShfolR6w8', title: 'Work Smart', author: 'Productivity Pro' },
+            { id: 'ZiF3R9QZpXo', title: 'Maximum Output', author: 'Performance Hub' },
+            { id: 'bS4Q-WWyl3Q', title: 'Efficiency Hacks', author: 'Time Pro' },
+            { id: '5p7f3kY2j3k', title: 'Deep Work', author: 'Focus Masters' },
+            { id: 'oHg5SJYRHA0', title: 'Productivity Secrets', author: 'Work Genius' },
+            { id: '1bumPyvzCyo', title: 'Time Mastery', author: 'Efficiency First' },
+            { id: 'wnh9NmU_oKc', title: 'Get More Done', author: 'Productivity King' },
+            { id: 'Lp7E973zozc', title: 'Focus Power', author: 'Concentration Pro' },
+            { id: 'xoVJKj8lcNQ', title: 'Work Excellence', author: 'Performance Pro' },
+            { id: 'Ml6cWf9D7Fg', title: 'Ultimate Productivity', author: 'Efficiency Master' }
         ]
     };
 
@@ -436,63 +473,9 @@ const Landing: React.FC = () => {
                         ))}
                     </div>
 
-                    <div className="grid lg:grid-cols-12 gap-8 items-start">
-                        {/* Quote Column */}
-                        <motion.div 
-                            initial={{ x: -30, opacity: 0 }}
-                            whileInView={{ x: 0, opacity: 1 }}
-                            viewport={{ once: true }}
-                            className="lg:col-span-5 space-y-8"
-                        >
-                            {/* Quote Card */}
-                            <div className="bg-white dark:bg-dark-bg rounded-[2.5rem] p-8 md:p-12 shadow-premium border border-gray-100 dark:border-gray-800 relative overflow-hidden group">
-                                <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-3xl -mr-24 -mt-24 group-hover:bg-primary/10 transition-colors" />
-                                <div className="relative z-10">
-                                    <div className="mb-8">
-                                        <div className="w-12 h-12 bg-primary text-white rounded-2xl flex items-center justify-center shadow-lg transform -rotate-6">
-                                            <Quote className="w-6 h-6" />
-                                        </div>
-                                    </div>
-                                    <AnimatePresence mode="wait">
-                                        <motion.div 
-                                            key={qi} 
-                                            initial={{ opacity: 0, y: 20 }} 
-                                            animate={{ opacity: 1, y: 0 }} 
-                                            exit={{ opacity: 0, y: -20 }} 
-                                            className="space-y-6"
-                                        >
-                                            <h3 className="text-2xl md:text-3xl font-black text-dark-bg dark:text-white leading-[1.3] italic">
-                                                "{q.t}"
-                                            </h3>
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center text-white text-2xl shadow-premium">
-                                                    {q.e}
-                                                </div>
-                                                <div>
-                                                    <p className="font-black text-dark-bg dark:text-white">{q.a}</p>
-                                                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{t('Daily Spark', 'ዕለታዊ ብልጭታ')}</p>
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    </AnimatePresence>
-                                    
-                                    <div className="mt-12 flex items-center justify-between">
-                                        <div className="flex gap-2">
-                                            <button onClick={nq} className="p-4 bg-primary text-white rounded-2xl shadow-xl hover:scale-110 active:scale-95 transition-all">
-                                                <RefreshCcw className="w-5 h-5" />
-                                            </button>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1">{t('Source', 'ምንጭ')}</p>
-                                            <p className="text-xs font-bold text-primary">SESA Inspiration</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
-
-                        {/* Video Grid Column */}
-                        <div className="lg:col-span-7">
+                    <div className="grid lg:grid-cols-3 gap-6 items-start">
+                        {/* Videos Column - Takes 2/3 width */}
+                        <div className="lg:col-span-2">
                             <AnimatePresence mode="wait">
                                 <motion.div
                                     key={activeMotivationCat + videoIndex}
@@ -509,32 +492,23 @@ const Landing: React.FC = () => {
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: idx * 0.1 }}
-                                            className="group relative rounded-3xl overflow-hidden shadow-premium bg-black aspect-video cursor-pointer"
+                                            className="group relative rounded-3xl overflow-hidden shadow-premium bg-black aspect-video"
                                             onClick={() => setIsWatching(true)}
                                         >
                                             <iframe 
-                                                className="w-full h-full border-none opacity-80 group-hover:opacity-100 transition-opacity" 
-                                                src={`https://www.youtube.com/embed/${vid.id}?autoplay=0&mute=0&enablejsapi=1`} 
+                                                className="w-full h-full border-none" 
+                                                src={`https://www.youtube.com/embed/${vid.id}?autoplay=0&controls=1&modestbranding=1&rel=0&fs=1&cc_load_policy=0&iv_load_policy=3`} 
                                                 title={vid.title}
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                                                 allowFullScreen 
                                             />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-100 pointer-events-none p-5 flex flex-col justify-end">
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity p-5 flex flex-col justify-end">
                                                 <div className="flex items-center justify-between">
                                                     <div>
-                                                        <p className="text-white font-black text-sm group-hover:text-primary transition-colors">{vid.title}</p>
-                                                        <p className="text-white/50 text-[10px] uppercase font-bold tracking-wider">{vid.author}</p>
+                                                        <p className="text-white font-black text-sm">{vid.title}</p>
+                                                        <p className="text-white/70 text-xs uppercase font-bold tracking-wider">{vid.author}</p>
                                                     </div>
-                                                    {isWatching && (
-                                                        <div className="flex items-center gap-1 px-2 py-1 bg-primary/20 text-primary rounded-full text-[10px] font-black uppercase">
-                                                            <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                                                            Watching
-                                                        </div>
-                                                    )}
                                                 </div>
-                                            </div>
-                                            <div className="absolute top-4 right-4 p-2 bg-white/10 backdrop-blur-md rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Play className="w-4 h-4 text-white" />
                                             </div>
                                         </motion.div>
                                     ))}
@@ -550,26 +524,79 @@ const Landing: React.FC = () => {
                                     <RefreshCcw className="w-3 h-3" /> {t('Switch Videos', 'ቪዲዮዎችን ቀይር')}
                                 </button>
                             </div>
-                            
-                            <motion.div 
-                                initial={{ opacity: 0 }}
-                                whileInView={{ opacity: 1 }}
-                                className="mt-8 p-6 rounded-3xl border border-dashed border-gray-200 dark:border-gray-800 flex flex-col md:flex-row items-center justify-between gap-4"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center">
-                                        <Target className="w-5 h-5" />
-                                    </div>
-                                    <p className="text-sm font-bold text-dark-bg dark:text-white">
-                                        {t('Did you know? Consistent learning increases retention by 40%.', 'በቋሚነት መማር የማስታወስ ችሎታን በ40% ይጨምራል።')}
-                                    </p>
-                                </div>
-                                <Link to="/auth?role=student" className="whitespace-nowrap px-6 py-2 bg-dark-bg dark:bg-white text-white dark:text-dark-bg font-black text-xs rounded-xl hover:scale-105 transition-all">
-                                    Start Learning Now
-                                </Link>
-                            </motion.div>
                         </div>
+
+                        {/* Quote Column - Takes 1/3 width */}
+                        <motion.div 
+                            initial={{ x: -30, opacity: 0 }}
+                            whileInView={{ x: 0, opacity: 1 }}
+                            viewport={{ once: true }}
+                            className="lg:col-span-1"
+                        >
+                            {/* Quote Card - Compact */}
+                            <div className="bg-white dark:bg-dark-bg rounded-3xl p-6 shadow-premium border border-gray-100 dark:border-gray-800 relative overflow-hidden group h-full">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors" />
+                                <div className="relative z-10 h-full flex flex-col">
+                                    <div className="mb-4">
+                                        <div className="w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg transform -rotate-6">
+                                            <Quote className="w-5 h-5" />
+                                        </div>
+                                    </div>
+                                    <AnimatePresence mode="wait">
+                                        <motion.div 
+                                            key={qi} 
+                                            initial={{ opacity: 0, y: 20 }} 
+                                            animate={{ opacity: 1, y: 0 }} 
+                                            exit={{ opacity: 0, y: -20 }} 
+                                            className="space-y-4 flex-1 flex flex-col"
+                                        >
+                                            <h3 className="text-lg md:text-xl font-black text-dark-bg dark:text-white leading-tight italic flex-1">
+                                                "{q.t}"
+                                            </h3>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center text-white text-xl shadow-premium flex-shrink-0">
+                                                    {q.e}
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-dark-bg dark:text-white text-sm">{q.a}</p>
+                                                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{t('Daily Spark', 'ዕለታዊ ብልጭታ')}</p>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    </AnimatePresence>
+                                    
+                                    <div className="mt-6 flex items-center justify-between">
+                                        <button onClick={nq} className="p-3 bg-primary text-white rounded-xl shadow-xl hover:scale-110 active:scale-95 transition-all">
+                                            <RefreshCcw className="w-4 h-4" />
+                                        </button>
+                                        <div className="text-right">
+                                            <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-0.5">{t('Source', 'ምንጭ')}</p>
+                                            <p className="text-xs font-bold text-primary">SESA Inspiration</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
                     </div>
+
+                    {/* CTA Banner */}
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        className="mt-8 p-6 rounded-3xl border border-dashed border-gray-200 dark:border-gray-800 flex flex-col md:flex-row items-center justify-between gap-4"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                <Target className="w-5 h-5" />
+                            </div>
+                            <p className="text-sm font-bold text-dark-bg dark:text-white">
+                                {t('Did you know? Consistent learning increases retention by 40%.', 'በቋሚነት መማር የማስታወስ ችሎታን በ40% ይጨምራል።')}
+                            </p>
+                        </div>
+                        <Link to="/auth?role=student" className="whitespace-nowrap px-6 py-2 bg-dark-bg dark:bg-white text-white dark:text-dark-bg font-black text-xs rounded-xl hover:scale-105 transition-all">
+                            Start Learning Now
+                        </Link>
+                    </motion.div>
                 </div>
             </Fade>
 

@@ -27,6 +27,10 @@ import messageRoutes from './routes/messages.js';
 import evaluationRoutes from './routes/evaluations.js';
 import videoWorkflowRoutes from './routes/videoWorkflowRoutes.js';
 import aiRoutes from './routes/ai.js';
+// New routes for Phase 1 features
+import quizRoutes from './routes/quizzes.js';
+import assignmentRoutes from './routes/assignments.js';
+import gamificationRoutes from './routes/gamification.js';
 import http from 'http';
 import { initSocket } from './utils/socket.js';
 import { fileURLToPath } from 'url';
@@ -157,12 +161,16 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/evaluations', evaluationRoutes);
 app.use('/api/video-workflow', videoWorkflowRoutes);
 app.use('/api/ai', aiRoutes);
+// Phase 1 Enhancement Routes
+app.use('/api/quizzes', quizRoutes);
+app.use('/api/assignments', assignmentRoutes);
+app.use('/api/gamification', gamificationRoutes);
 
 // Static file serving for uploads
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.get('/', (_req, res) => {
-    res.send('SESA Secure API with Real-time Notifications is running...');
+    res.send('SafeEdu Secure API with Real-time Notifications is running...');
 });
 
 // Create HTTP server
