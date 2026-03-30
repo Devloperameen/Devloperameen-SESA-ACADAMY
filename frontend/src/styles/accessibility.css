@@ -1,0 +1,249 @@
+/* Accessibility Enhancements */
+
+/* High Contrast Mode */
+.high-contrast {
+  --bg-primary: #000000;
+  --bg-secondary: #1a1a1a;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --accent-primary: #ffff00;
+  --accent-secondary: #00ffff;
+  --border-color: #ffffff;
+}
+
+.high-contrast * {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.high-contrast a,
+.high-contrast button {
+  background-color: var(--accent-primary) !important;
+  color: var(--bg-primary) !important;
+  border: 2px solid var(--border-color) !important;
+}
+
+.high-contrast a:hover,
+.high-contrast button:hover {
+  background-color: var(--accent-secondary) !important;
+}
+
+/* Screen Reader Optimizations */
+.screen-reader-optimized {
+  font-family: 'Arial', sans-serif !important;
+  line-height: 1.6 !important;
+}
+
+.screen-reader-optimized * {
+  font-size: calc(var(--base-font-size, 16px) * 1.1) !important;
+  line-height: 1.6 !important;
+}
+
+.screen-reader-optimized h1,
+.screen-reader-optimized h2,
+.screen-reader-optimized h3,
+.screen-reader-optimized h4,
+.screen-reader-optimized h5,
+.screen-reader-optimized h6 {
+  margin-bottom: 1rem !important;
+  margin-top: 1.5rem !important;
+}
+
+.screen-reader-optimized p {
+  margin-bottom: 1rem !important;
+}
+
+.screen-reader-optimized button,
+.screen-reader-optimized a {
+  padding: 0.75rem 1rem !important;
+  margin: 0.25rem !important;
+  min-height: 44px !important;
+  min-width: 44px !important;
+}
+
+/* Focus Indicators */
+*:focus {
+  outline: 3px solid #4A90E2 !important;
+  outline-offset: 2px !important;
+}
+
+.high-contrast *:focus {
+  outline: 3px solid var(--accent-primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* Skip Links */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #000;
+  color: #fff;
+  padding: 8px;
+  text-decoration: none;
+  z-index: 1000;
+  border-radius: 4px;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Font Size Variables */
+:root {
+  --base-font-size: 16px;
+}
+
+html {
+  font-size: var(--base-font-size);
+}
+
+/* Voice Navigation Indicators */
+.voice-listening {
+  border: 3px solid #ff4444 !important;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { border-color: #ff4444; }
+  50% { border-color: #ff8888; }
+  100% { border-color: #ff4444; }
+}
+
+.voice-speaking {
+  border: 3px solid #44ff44 !important;
+  animation: speak 0.5s infinite alternate;
+}
+
+@keyframes speak {
+  0% { border-color: #44ff44; }
+  100% { border-color: #88ff88; }
+}
+
+/* Accessibility Toolbar */
+.accessibility-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #000;
+  color: #fff;
+  padding: 0.5rem;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.accessibility-toolbar button {
+  background: #333;
+  color: #fff;
+  border: 1px solid #666;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.accessibility-toolbar button:hover {
+  background: #555;
+}
+
+.accessibility-toolbar button.active {
+  background: #4A90E2;
+}
+
+/* Screen Reader Only Content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Keyboard Navigation Helpers */
+.keyboard-user *:focus {
+  outline: 3px solid #4A90E2 !important;
+  outline-offset: 2px !important;
+}
+
+/* Touch Target Sizing */
+@media (pointer: coarse) {
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+}
+
+/* Color Blind Friendly Patterns */
+.colorblind-friendly {
+  --success-color: #0066cc;
+  --warning-color: #ff9900;
+  --error-color: #cc0000;
+  --info-color: #6600cc;
+}
+
+.colorblind-friendly .text-green-600 {
+  color: var(--success-color) !important;
+}
+
+.colorblind-friendly .text-yellow-600 {
+  color: var(--warning-color) !important;
+}
+
+.colorblind-friendly .text-red-600 {
+  color: var(--error-color) !important;
+}
+
+.colorblind-friendly .text-blue-600 {
+  color: var(--info-color) !important;
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  * {
+    background: white !important;
+    color: black !important;
+  }
+  
+  a::after {
+    content: " (" attr(href) ")";
+  }
+}
+
+/* Dark Mode Accessibility */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --focus-color: #66b3ff;
+  }
+  
+  *:focus {
+    outline-color: var(--focus-color) !important;
+  }
+}

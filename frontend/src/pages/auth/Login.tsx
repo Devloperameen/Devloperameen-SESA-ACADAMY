@@ -117,8 +117,8 @@ const Login: React.FC<LoginProps> = ({ role, title }) => {
             return;
         }
 
-        if (password.length < 6) {
-            setError('Password must be at least 6 characters.');
+        if (isRegister && (password.length < 8 || !/\d/.test(password))) {
+            setError('Password must be at least 8 characters and include at least one number.');
             setIsLoading(false);
             return;
         }

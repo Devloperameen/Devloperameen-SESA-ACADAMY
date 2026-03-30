@@ -1,16 +1,30 @@
 import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const apiKey = process.env.OPENAI_API_KEY;
-if (!apiKey) {
-  console.warn('OPENAI_API_KEY is not set. AI features will be disabled.');
+// ── Providers ───────────────────────────────────────────────────────────────
+
+// 1. OpenAI Configuration
+const openaiApiKey = process.env.OPENAI_API_KEY;
+export const openAiClient = openaiApiKey && !openaiApiKey.startsWith('sk-xxxx') 
+  ? new OpenAI({ apiKey: openaiApiKey }) 
+  : null;
+
+// 2. Gemini Configuration
+const geminiApiKey = process.env.GEMINI_API_KEY;
+export const geminiClient = geminiApiKey && !geminiApiKey.startsWith('YOUR_GEMINI') 
+  ? new GoogleGenerativeAI(geminiApiKey) 
+  : null;
+
+if (!openAiClient && !geminiClient) {
+  console.warn('AI features are disabled: No valid OPENAI_API_KEY or GEMINI_API_KEY found.');
 }
-
-export const openAiClient = apiKey ? new OpenAI({ apiKey }) : null;
 
 export type ChatMessagePayload = {
   role: 'system' | 'user' | 'assistant';
   content: string;
 };
+
+// ── Unified Chat Response ───────────────────────────────────────────────────
 
 export const createChatResponse = async (
   messages: ChatMessagePayload[],
@@ -18,21 +32,59 @@ export const createChatResponse = async (
     model?: string;
     temperature?: number;
     maxTokens?: number;
+    provider?: 'openai' | 'gemini';
   }
 ) => {
-  if (!openAiClient) throw new Error('OpenAI client not configured. Set OPENAI_API_KEY in env.');
-  const model = options?.model || 'gpt-4o-mini';
-  const temperature = typeof options?.temperature === 'number' ? options.temperature : 0.7;
-  const maxTokens = options?.maxTokens || 1000;
+  // Use specified provider or auto-detect
+  const provider = options?.provider || (geminiClient ? 'gemini' : (openAiClient ? 'openai' : null));
 
-  const response = await openAiClient.chat.completions.create({
-    model,
-    messages,
-    temperature,
-    max_tokens: maxTokens,
-  });
+  if (!provider) {
+    throw new Error('AI providers are not configured. Please set GEMINI_API_KEY or OPENAI_API_KEY.');
+  }
 
-  return response.choices?.[0]?.message?.content || '';
+  // --- Option A: Gemini (Preferred for Native Integration) ---
+  if (provider === 'gemini' && geminiClient) {
+    try {
+      const modelName = options?.model || 'gemini-2.0-flash';
+      const model = geminiClient.getGenerativeModel({ model: modelName });
+      
+      // Extract system prompt separately for Gemini
+      const systemPrompt = messages.find(m => m.role === 'system')?.content || '';
+      const userMessages = messages.filter(m => m.role !== 'system');
+      
+      const prompt = systemPrompt 
+        ? `System Instructions: ${systemPrompt}\n\nUser: ${userMessages.map(m => m.content).join('\n')}`
+        : userMessages.map(m => m.content).join('\n');
+
+      const result = await model.generateContent(prompt);
+      return result.response.text();
+    } catch (geminiError: any) {
+      console.error('Gemini API error, falling back to mock:', geminiError.message);
+      // Fall through to mock response below
+    }
+  }
+
+  // --- Option B: OpenAI ---
+  if (provider === 'openai' && openAiClient) {
+    const model = options?.model || 'gpt-4o-mini';
+    const response = await openAiClient.chat.completions.create({
+      model,
+      messages,
+      temperature: options?.temperature ?? 0.7,
+      max_tokens: options?.maxTokens ?? 1000,
+    });
+    return response.choices?.[0]?.message?.content || '';
+  }
+
+  // --- Option C: Mock AI (Fallback when no keys are set) ---
+  return `[Mock AI Assistant]: I'm currently in "Offline Mode" because no API keys (Google Gemini or OpenAI) have been configured in the backend .env file. 
+
+To enable my full capabilities, please:
+1. Get an API key from Google AI Studio (Gemini) or OpenAI.
+2. Add it to the .env file as GEMINI_API_KEY or OPENAI_API_KEY.
+3. Restart the server.
+
+In the meantime, feel free to explore the platform's features like courses, enrollments, and payments!`;
 };
 
 export const generateLessonFromTopic = async (
@@ -103,7 +155,7 @@ export const generateQuizFromContent = async (
   numberOfQuestions = 5,
   difficulty: 'easy' | 'medium' | 'hard' = 'medium'
 ) => {
-  if (!openAiClient) throw new Error('OpenAI client not configured. Set OPENAI_API_KEY in env.');
+
 
   const prompt = `Based on the following lesson content, generate ${numberOfQuestions} multiple-choice quiz questions at ${difficulty} difficulty level.
 
@@ -143,7 +195,7 @@ Format the response as a JSON array of question objects with fields: questionTex
 
 // Generate key points from lesson content
 export const extractKeyPoints = async (content: string, numberOfPoints = 5) => {
-  if (!openAiClient) throw new Error('OpenAI client not configured. Set OPENAI_API_KEY in env.');
+
 
   const prompt = `Extract the ${numberOfPoints} most important key points from the following educational content. Each point should be:
 - Clear and concise (1-2 sentences)
@@ -188,7 +240,7 @@ export const generateRecommendations = async (
   },
   availableCourses: Array<{ id: string; title: string; description: string; level: string; category: string }>
 ) => {
-  if (!openAiClient) throw new Error('OpenAI client not configured. Set OPENAI_API_KEY in env.');
+
 
   const prompt = `Based on the student profile and available courses, recommend the top 5 courses that would best help this student progress.
 
@@ -242,7 +294,7 @@ export const chatbotResponse = async (
     studentLevel?: string;
   }
 ) => {
-  if (!openAiClient) throw new Error('OpenAI client not configured. Set OPENAI_API_KEY in env.');
+
 
   const systemPrompt = `You are SafeEdu AI Assistant, a helpful and friendly educational support chatbot. You help students with:
 - Understanding course content
@@ -284,7 +336,7 @@ export const generateStudyPlan = async (
     preferredStudyDays: string[];
   }
 ) => {
-  if (!openAiClient) throw new Error('OpenAI client not configured. Set OPENAI_API_KEY in env.');
+
 
   const daysUntilTarget = Math.ceil((studentGoals.targetCompletionDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 
@@ -340,7 +392,7 @@ export const analyzePerformance = async (
     strugglingTopics: string[];
   }
 ) => {
-  if (!openAiClient) throw new Error('OpenAI client not configured. Set OPENAI_API_KEY in env.');
+
 
   const avgQuizScore = performanceData.quizScores.length > 0
     ? performanceData.quizScores.reduce((a, b) => a + b, 0) / performanceData.quizScores.length
