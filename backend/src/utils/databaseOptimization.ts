@@ -20,7 +20,7 @@ export const connectWithRetry = async (uri: string, maxRetries = 3): Promise<voi
 };
 
 // Connection health check
-export const checkDatabaseHealth = async (): Promise<{ status: string; responseTime: number }> => {
+export const checkDatabaseHealth = async (): Promise<{ status: string; responseTime: number; error?: string }> => {
     const startTime = Date.now();
     
     try {

@@ -171,9 +171,8 @@ export const bulkUpdateCourses = async (req: AuthRequest, res: Response, next: N
 
         const result = await Course.updateMany(
             { _id: { $in: courseIds } },
-            { $set: updates, updatedAt: new Date() },
-            { new: true }
-        );
+            { $set: updates, updatedAt: new Date() }
+        ) as any;
 
         res.json({
             success: true,

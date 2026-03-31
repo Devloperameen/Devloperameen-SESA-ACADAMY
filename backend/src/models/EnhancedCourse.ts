@@ -294,7 +294,7 @@ CourseSchema.index({ instructor: 1, createdAt: -1 });
 CourseSchema.index({ 'seo.slug': 1 }, { unique: true });
 
 // Pre-save middleware for SEO slug generation
-CourseSchema.pre('save', function(next) {
+CourseSchema.pre('save', function(this: any) {
     if (this.isModified('title') && !this.seo.slug) {
         this.seo.slug = this.title
             .toLowerCase()
@@ -303,7 +303,6 @@ CourseSchema.pre('save', function(next) {
             .substring(0, 100);
     }
     this.updatedAt = new Date();
-    next();
 });
 
 export const Lesson = mongoose.models.Lesson || mongoose.model<ILesson>('Lesson', LessonSchema);

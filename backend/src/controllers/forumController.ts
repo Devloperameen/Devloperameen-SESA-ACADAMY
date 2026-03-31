@@ -12,10 +12,10 @@ export const createThread = async (req: AuthRequest, res: Response) => {
         const thread = new ForumThread({
             course: courseId,
             title,
-            creator: req.user!.id,
+            creator: (req as any).user.id,
             posts: [{
-                user: req.user!.id,
-                userName: req.user!.name,
+                user: (req as any).user.id,
+                userName: (req as any).user.name,
                 text: messageText
             }]
         });
@@ -51,8 +51,8 @@ export const addPost = async (req: AuthRequest, res: Response) => {
         if (!thread) return res.status(404).json({ message: 'Thread not found' });
 
         thread.posts.push({
-            user: req.user!.id as any,
-            userName: req.user!.name,
+            user: (req as any).user.id,
+            userName: (req as any).user.name,
             text: messageText,
             createdAt: new Date()
         });

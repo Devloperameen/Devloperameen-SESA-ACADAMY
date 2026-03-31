@@ -95,8 +95,8 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction) =
     if (req.body) {
         const sanitizeString = (str: string): string => {
             return str
-                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*<\/script>/gi, '')
-                .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*<\/iframe>/gi, '')
+                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
                 .replace(/javascript:/gi, '')
                 .replace(/on\w+\s*=/gi, '')
                 .trim();
@@ -130,7 +130,7 @@ export const apiVersioning = (req: Request, res: Response, next: NextFunction) =
     const apiVersion = req.headers['api-version'];
     const supportedVersions = ['v1', 'v2'];
     
-    if (apiVersion && !supportedVersions.includes(apiVersion)) {
+    if (apiVersion && typeof apiVersion === 'string' && !supportedVersions.includes(apiVersion)) {
         return res.status(400).json({
             success: false,
             message: `Unsupported API version: ${apiVersion}`,

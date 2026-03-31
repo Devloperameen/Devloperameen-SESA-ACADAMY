@@ -151,7 +151,7 @@ router.get('/google/callback',
     passport.authenticate('google', { failureRedirect: `${FRONTEND_URL}/login?error=google_failed`, session: false }),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            await handleOAuthSuccess(res, req.user as any);
+            await handleOAuthSuccess(res, (req as any).user);
         } catch (err) {
             next(err);
         }
@@ -168,7 +168,7 @@ router.get('/github/callback',
     passport.authenticate('github', { failureRedirect: `${FRONTEND_URL}/login?error=github_failed`, session: false }),
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            await handleOAuthSuccess(res, req.user as any);
+            await handleOAuthSuccess(res, (req as any).user);
         } catch (err) {
             next(err);
         }

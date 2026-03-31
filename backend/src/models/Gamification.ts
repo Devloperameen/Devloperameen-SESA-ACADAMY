@@ -92,7 +92,7 @@ const GamificationSchema: Schema = new Schema({
     updatedAt: { type: Date, default: Date.now }
 });
 
-GamificationSchema.pre('save', function() {
+GamificationSchema.pre('save', function(this: any) {
     this.updatedAt = new Date();
     
     // Calculate level based on points
