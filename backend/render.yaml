@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: sesa-backend
+    env: node
+    plan: free
+    buildCommand: npm run render-build
+    startCommand: npm run render-start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - fromGroup: sesa-backend-secrets
